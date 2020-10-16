@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 
 const authModel = require('../models/auth.model');
 
+
+// POST register
 exports.register = (req, res) => {
   const body = req.body;
   authModel.findOne({ email: body.email }).then((doc) => {
@@ -27,6 +29,7 @@ exports.register = (req, res) => {
   })
 }
 
+// POST login
 exports.login = (req, res) => {
   const body = req.body;
   authModel.findOne({ email: body.email }).then((doc) => {
@@ -62,5 +65,15 @@ exports.login = (req, res) => {
           mongoose.disconnect();
         });
     }
+  })
+}
+
+
+// PATCH update role
+exports.updateRole = (req, res) => {
+  authModel.findByIdAndUpdate(req.params.id, {
+    role: req.body.role
+  }).then((doc) => {
+    res.json(doc);
   })
 }

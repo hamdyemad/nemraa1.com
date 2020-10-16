@@ -40,7 +40,7 @@ router.patch('/colors/:id', productsController.deleteColor)
 router.get('/:id', productsController.getProductById)
 
 // DELETE delete product by id
-router.delete('/:id', verfication.superAdminVerifyed, productsController.deleteProduct)
+router.delete('/:id', productsController.deleteProduct)
 
 
 

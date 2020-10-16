@@ -3,8 +3,18 @@ const date = new Date();
 const orderSchema = mongoose.Schema({
     seq: Number,
     static: String,
-    orders: Array,
-    totalPrice: Number,
+    order: {
+        seq: Number,
+        category: String,
+        name: String,
+        image: String,
+        price: Number,
+        unitPrice: Number,
+        discount: Number,
+        totalPrice: Number,
+        amount: Number,
+        choosedColor: String
+    },
     status: {
         type: String,
         default: 'pending'
@@ -13,21 +23,17 @@ const orderSchema = mongoose.Schema({
     clientInfo: {
         name: String,
         address: String,
-        mobile: Number,
+        mobile: String,
         city: String,
         comment: String
     },
     // client info
-    notifiedCustomer: {
-        type: Boolean,
-        default: false
-    },
     statusHistory: {
         type: Array,
         default: []
     },
     addedDate: {
-        type: Date,
+        type: String,
         default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}`
     }
 });

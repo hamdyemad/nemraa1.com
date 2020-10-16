@@ -85,16 +85,18 @@ exports.addNewProduct = (req, res) => {
           price: body.price,
           discount: body.discount,
           unitPrice: body.price - (body.price * body.discount / 100),
-          image: req.files.image[0].filename,
-          otherImages: req.files.otherImages.map(x => x.filename)
+          video: body.video,
+          image: req.files.image[0].filename
         });
         newProduct.save().then((doc) => {
-          if (doc) {
-            Product.findOneAndUpdate({ static: 'static' }, { $addToSet: { _categorys: [body.category] } })
-              .then(() => {
-                res.json(doc)
-              })
+          if (req.files.otherImages) {
+            console.log('yes');
+            Product.findOneAndUpdate({ _id: doc._id }, { otherImages: req.files.otherImages.map(x => x.filename) }).then()
           }
+          Product.findOneAndUpdate({ static: 'static' }, { $addToSet: { _categorys: [body.category] } })
+            .then(() => {
+              res.json(doc)
+            })
         }).catch(err => {
           console.log(err)
         })
@@ -119,6 +121,7 @@ exports.updateProduct = (req, res) => {
     colors: body.colors,
     discount: body.discount,
     unitPrice: body.price - (body.price * body.discount / 100),
+    video: body.video,
     image: body.image,
     otherImages: body.otherImages
   }).then((doc) => {

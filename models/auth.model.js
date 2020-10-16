@@ -22,7 +22,7 @@ const authSchema = mongoose.Schema({
         default: 'admin'
     },
     addedDate: {
-        type: Date,
+        type: String,
         default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}`
     }
 })

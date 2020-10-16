@@ -3,18 +3,19 @@ const Order = require('../models/order.model');
 exports.addOrder = (req, res) => {
     Order.findOneAndUpdate({ static: 'static' }, { $inc: { seq: 1 } }).then((value) => {
         let seq = value.seq;
-        const totalPrice = req.body.orders.map(x => x.amount * x.unitPrice).reduce((acc, current) => acc + current)
+        const body = req.body;
+        const orderObj = req.body.order;
+        orderObj.totalPrice = orderObj.unitPrice * orderObj.amount
         let newOrder = new Order({
             seq: seq,
-            orders: req.body.orders,
+            order: orderObj,
             clientInfo: {
-                name: req.body.clientInfo.name,
-                address: req.body.clientInfo.address,
-                mobile: req.body.clientInfo.mobile,
-                city: req.body.clientInfo.city,
-                comment: req.body.clientInfo.comment,
-            },
-            totalPrice: totalPrice
+                name: body.clientInfo.name,
+                address: body.clientInfo.address,
+                mobile: body.clientInfo.mobile,
+                city: body.clientInfo.city,
+                comment: body.clientInfo.comment,
+            }
         });
         newOrder
             .save()
@@ -27,6 +28,7 @@ exports.addOrder = (req, res) => {
 /* GET get all orders  */
 exports.getAllOrders = (req, res) => {
     let query = req.query;
+    console.log(query);
     if (Object.keys(query).length !== 0) {
         Order.find({
             $or: [
@@ -37,12 +39,12 @@ exports.getAllOrders = (req, res) => {
                 { addedDate: query.addedDate },
             ],
             $nor: [{ static: 'static' }]
-        }).sort({ seq: -1, addedDate: -1 })
+        }).sort({ seq: -1 })
             .then((doc) => {
                 res.json(doc);
             })
     } else {
-        Order.find({ $nor: [{ static: 'static' }] }).sort({ seq: -1, addedDate: -1 })
+        Order.find({ $nor: [{ static: 'static' }] }).sort({seq: -1})
             .then((value) => {
                 res.json(value);
             })
@@ -56,7 +58,6 @@ exports.getOrderById = (req, res) => {
     })
 }
 
-
 /* DELETE delete order by id */
 exports.deleteOrderById = (req, res) => {
     Order.findByIdAndDelete(req.params.id).then((doc) => {
@@ -66,13 +67,15 @@ exports.deleteOrderById = (req, res) => {
 
 /* POST add status histroy */
 exports.addStatusHistory = (req, res) => {
-    let history = req.body;
+    const date = new Date();
+    updatedDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}`;
+    const history = req.body;
+    history.updatedDate = updatedDate;
     Order.findByIdAndUpdate(req.params.id,
         {
             $push: { statusHistory: history },
             status: history.status,
-            comment: history.comment,
-            notifiedCustomer: history.notifiedCustomer
+            comment: history.comment
         }).then((value) => {
             res.json(value);
         })

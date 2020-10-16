@@ -10,8 +10,12 @@ const ProductSchema = mongoose.Schema({
     price: Number,
     discount: Number,
     unitPrice: Number,
+    video: String,
     image: String,
-    otherImages: Array,
+    otherImages: {
+        type: Array,
+        default: []
+    },
     colors: {
         type: Array,
         default: []

@@ -8,4 +8,8 @@ router.post("/register", verfication.superAdminVerifyed, authController.register
 /* POST login */
 router.post("/login", authController.login);
 
+
+/* PATCH update role */
+router.patch('/role/:id', authController.updateRole)
+
 module.exports = router;
