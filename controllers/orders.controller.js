@@ -20,7 +20,9 @@ exports.addOrder = (req, res) => {
         newOrder
             .save()
             .then((doc) => {
-                res.json(doc);
+                Order.findOneAndUpdate({ static: 'static' }, { $addToSet: { cities: doc.clientInfo.city } }).then(() => {
+                    res.json(doc);
+                });
             })
     })
 };
@@ -32,7 +34,7 @@ exports.getAllOrders = (req, res) => {
     if (Object.keys(query).length !== 0) {
         Order.find({
             $or: [
-                { seq: query.id },
+                { seq: query.seq },
                 { "clientInfo.name": new RegExp(`^${query.name}`) },
                 { "clientInfo.city": query.city },
                 { status: query.status },
@@ -44,16 +46,39 @@ exports.getAllOrders = (req, res) => {
                 res.json(doc);
             })
     } else {
-        Order.find({ $nor: [{ static: 'static' }] }).sort({seq: -1})
+        Order.find({ $nor: [{ static: 'static' }] }).sort({ seq: -1 })
             .then((value) => {
                 res.json(value);
             })
     }
 };
 
+/* GET get static*/
+exports.getStatic = (req, res) => {
+    Order.findOne({ static: 'static' }).then((doc) => {
+        res.json(doc);
+    })
+}
+
+/* PATCH  update all statuese of static */
+exports.updateStatuses = (req, res) => {
+    Order.findOneAndUpdate({ static: 'static' }, { $addToSet: { statuses: req.body.newStatus } }).then((doc) => {
+        res.json(doc);
+    })
+}
+
 /* GET get order by id */
 exports.getOrderById = (req, res) => {
     Order.findById(req.params.id).then((doc) => {
+        res.json(doc);
+    })
+}
+
+/* PATCh update order by id */
+exports.editOrder = (req, res) => {
+    Order.findByIdAndUpdate(req.params.id, {
+        'order.totalPrice': req.body.totalPrice
+    }).then((doc) => {
         res.json(doc);
     })
 }
@@ -68,9 +93,8 @@ exports.deleteOrderById = (req, res) => {
 /* POST add status histroy */
 exports.addStatusHistory = (req, res) => {
     const date = new Date();
-    updatedDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}`;
     const history = req.body;
-    history.updatedDate = updatedDate;
+    history.updatedDate = date;
     Order.findByIdAndUpdate(req.params.id,
         {
             $push: { statusHistory: history },

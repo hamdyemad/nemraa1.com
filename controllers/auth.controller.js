@@ -51,7 +51,7 @@ exports.login = (req, res) => {
               }
                 break
               case 'super-admin': {
-                let token = jwt.sign({ superAdminId: doc._id, role: doc.role }, process.env.superAdminSecretKey, {
+                let token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.superAdminSecretKey, {
                   expiresIn: "1h",
                 });
                 res.json({ access_token: token, role: doc.role });
@@ -69,11 +69,32 @@ exports.login = (req, res) => {
 }
 
 
+// get all admins
+exports.getAllAdmins = (req, res) => {
+  authModel.find({}).then((doc) => {
+    res.json(doc);
+  })
+}
+
+// get admin info
+exports.getAdminInfo = (req, res) => {
+  authModel.findById(req.adminId).then((doc) => {
+    res.json(doc);
+  })
+}
+
 // PATCH update role
 exports.updateRole = (req, res) => {
   authModel.findByIdAndUpdate(req.params.id, {
     role: req.body.role
   }).then((doc) => {
+    res.json(doc);
+  })
+}
+
+// DELETE admin
+exports.deleteAdmin = (req, res) => {
+  authModel.findOneAndDelete({ _id: req.params.id }).then((doc) => {
     res.json(doc);
   })
 }

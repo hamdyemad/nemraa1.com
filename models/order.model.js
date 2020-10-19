@@ -3,6 +3,8 @@ const date = new Date();
 const orderSchema = mongoose.Schema({
     seq: Number,
     static: String,
+    cities: Array,
+    statuses: Array,
     order: {
         seq: Number,
         category: String,
@@ -17,7 +19,7 @@ const orderSchema = mongoose.Schema({
     },
     status: {
         type: String,
-        default: 'pending'
+        default: 'معلق'
     },
     // client info
     clientInfo: {
@@ -34,7 +36,7 @@ const orderSchema = mongoose.Schema({
     },
     addedDate: {
         type: String,
-        default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}`
+        default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
     }
 });
 const Order = mongoose.model('order', orderSchema);

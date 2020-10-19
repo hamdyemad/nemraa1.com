@@ -23,7 +23,7 @@ const authSchema = mongoose.Schema({
     },
     addedDate: {
         type: String,
-        default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}`
+        default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
     }
 })
 

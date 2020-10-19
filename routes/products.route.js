@@ -21,26 +21,26 @@ const upload = multer({ storage }).fields([
 router.get('/categorys', productsController.getAllCategorys)
 
 // POST add new category
-router.post('/categorys', productsController.addNewCategory)
+router.post('/categorys', verfication.superAdminVerifyed, productsController.addNewCategory)
 
 // GET get product by options
 router.get('/', productsController.getProductsByOptions);
 
 // POST add new product
-router.post('/', upload, productsController.addNewProduct)
+router.post('/', upload, verfication.superAdminVerifyed, productsController.addNewProduct)
 
 // PATCH update product
-router.patch('/:id', upload, productsController.updateProduct);
+router.patch('/:id', upload, verfication.superAdminVerifyed, productsController.updateProduct);
 
 // DELETE delete product color
-router.patch('/colors/:id', productsController.deleteColor)
+router.patch('/colors/:id', verfication.superAdminVerifyed, productsController.deleteColor)
 
 
 // GET get product by id
 router.get('/:id', productsController.getProductById)
 
 // DELETE delete product by id
-router.delete('/:id', productsController.deleteProduct)
+router.delete('/:id', verfication.superAdminVerifyed, productsController.deleteProduct)
 
 
 

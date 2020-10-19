@@ -8,8 +8,16 @@ router.post("/register", verfication.superAdminVerifyed, authController.register
 /* POST login */
 router.post("/login", authController.login);
 
+/* GET get all admins */
+router.get('/admins', verfication.superAdminVerifyed, authController.getAllAdmins);
+
+/* GET get admin info */
+router.get('/admin', verfication.verifyed, authController.getAdminInfo)
 
 /* PATCH update role */
-router.patch('/role/:id', authController.updateRole)
+router.patch('/admins/role/:id', verfication.superAdminVerifyed, authController.updateRole)
+
+/* DELETE admin */
+router.delete('/admins/:id', verfication.superAdminVerifyed, authController.deleteAdmin)
 
 module.exports = router;

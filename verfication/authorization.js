@@ -52,7 +52,7 @@ exports.verifyed = (req, res, next) => {
                 let superAdminPayload = jwt.verify(authorization, process.env.superAdminSecretKey);
                 console.log(superAdminPayload);
                 if (superAdminPayload) {
-                    req.superAdminId = superAdminPayload.superAdminId;
+                    req.adminId = superAdminPayload.adminId;
                     next();
                 }
             }
