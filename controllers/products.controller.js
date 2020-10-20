@@ -30,7 +30,7 @@ exports.addNewCategory = (req, res) => {
 // GET get product by options
 exports.getProductsByOptions = (req, res) => {
   let query = req.query;
-  if (Object.keys(query).length == 0) {
+  if (Object.keys(query).length == 0 || query.category == 'all') {
     /* GET get all products */
     Product.find({ $nor: [{ static: 'static' }] }).sort({ seq: -1, addedDate: -1 })
       .then((doc) => {
