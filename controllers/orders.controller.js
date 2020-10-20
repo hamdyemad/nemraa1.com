@@ -30,7 +30,6 @@ exports.addOrder = (req, res) => {
 /* GET get all orders  */
 exports.getAllOrders = (req, res) => {
     let query = req.query;
-    console.log(query);
     if (Object.keys(query).length !== 0) {
         Order.find({
             $or: [

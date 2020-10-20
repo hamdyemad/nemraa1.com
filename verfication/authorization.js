@@ -41,7 +41,6 @@ exports.verifyed = (req, res, next) => {
     if (authorization) {
         try {
             let adminPayload = jwt.verify(authorization, process.env.adminSecretKey);
-            console.log(adminPayload);
             if (adminPayload) {
                 req.adminId = adminPayload.adminId;
                 next();
@@ -50,7 +49,6 @@ exports.verifyed = (req, res, next) => {
         catch {
             try {
                 let superAdminPayload = jwt.verify(authorization, process.env.superAdminSecretKey);
-                console.log(superAdminPayload);
                 if (superAdminPayload) {
                     req.adminId = superAdminPayload.adminId;
                     next();

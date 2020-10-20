@@ -15,7 +15,8 @@ const orderSchema = mongoose.Schema({
         discount: Number,
         totalPrice: Number,
         amount: Number,
-        choosedColor: String
+        choosedColor: String,
+        choosedSize: String
     },
     status: {
         type: String,

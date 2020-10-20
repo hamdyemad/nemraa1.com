@@ -33,7 +33,7 @@ router.post('/', upload, verfication.superAdminVerifyed, productsController.addN
 router.patch('/:id', upload, verfication.superAdminVerifyed, productsController.updateProduct);
 
 // DELETE delete product color
-router.patch('/colors/:id', verfication.superAdminVerifyed, productsController.deleteColor)
+router.patch('/colorAndSize/:id', verfication.superAdminVerifyed, productsController.deleteColorAndSize)
 
 
 // GET get product by id

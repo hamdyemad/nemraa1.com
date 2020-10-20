@@ -17,7 +17,6 @@ exports.getAllCategorys = (req, res) => {
 
 // POST add new category
 exports.addNewCategory = (req, res) => {
-  console.log(req.body);
   Product.findOneAndUpdate({ static: 'static' }, {
     $addToSet: {
       _categorys: req.body.newCategory
@@ -31,7 +30,6 @@ exports.addNewCategory = (req, res) => {
 // GET get product by options
 exports.getProductsByOptions = (req, res) => {
   let query = req.query;
-  console.log(query)
   if (Object.keys(query).length == 0) {
     /* GET get all products */
     Product.find({ $nor: [{ static: 'static' }] }).sort({ seq: -1, addedDate: -1 })
@@ -80,7 +78,9 @@ exports.addNewProduct = (req, res) => {
           seq: doc.seq,
           name: body.name,
           description: body.description,
+          facebookPexel: body.facebookPexel,
           colors: body.colors,
+          sizes: body.sizes,
           category: body.category,
           price: body.price,
           discount: body.discount,
@@ -90,7 +90,6 @@ exports.addNewProduct = (req, res) => {
         });
         newProduct.save().then((doc) => {
           if (req.files.otherImages) {
-            console.log('yes');
             Product.findOneAndUpdate({ _id: doc._id }, { otherImages: req.files.otherImages.map(x => x.filename) }).then()
           }
           Product.findOneAndUpdate({ static: 'static' }, { $addToSet: { _categorys: [body.category] } })
@@ -116,9 +115,11 @@ exports.updateProduct = (req, res) => {
   Product.findByIdAndUpdate(req.params.id, {
     name: body.name,
     description: body.description,
+    facebookPexel: body.facebookPexel,
     category: body.category,
     price: body.price,
     colors: body.colors,
+    sizes: body.sizes,
     discount: body.discount,
     unitPrice: body.price - (body.price * body.discount / 100),
     video: body.video,
@@ -130,7 +131,7 @@ exports.updateProduct = (req, res) => {
         image: req.files.image[0].filename
       }).then((resImage) => {
         deleteImg(doc.image);
-        console.log(resImage, 'image hamdy :D')
+        console.log(resImage, 'main image deleted')
       })
     }
     if (req.files.otherImages) {
@@ -140,14 +141,12 @@ exports.updateProduct = (req, res) => {
         for (let image of doc.otherImages) {
           deleteImg(image);
         }
-        console.log(resOtherImages, 'otherImages hamdy :D')
+        console.log(resOtherImages, 'otherImages deleted')
       })
     }
     res.json(doc);
   })
-    .catch(err => {
-      console.log(err)
-    })
+    .catch()
 }
 
 // DELETE delete product by id
@@ -166,9 +165,9 @@ exports.deleteProduct = (req, res) => {
 }
 
 // DELETE delete color by id
-exports.deleteColor = (req, res) => {
+exports.deleteColorAndSize = (req, res) => {
   Product.findByIdAndUpdate(req.params.id, {
-    $pull: { colors: req.body.color }
+    $pull: { colors: req.body.color, sizes: req.body.size }
   }).then((doc) => {
     res.json(doc);
   })

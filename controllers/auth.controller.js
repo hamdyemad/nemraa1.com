@@ -19,7 +19,7 @@ exports.register = (req, res) => {
         })
         newAuth.save().then((doc) => {
           const token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.adminSecretKey, {
-            expiresIn: '1h'
+            expiresIn: '7h'
           })
           res.json({ access_token: token, role: doc.role });
         })
@@ -45,14 +45,14 @@ exports.login = (req, res) => {
             switch (doc.role) {
               case 'admin': {
                 let token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.adminSecretKey, {
-                  expiresIn: "1h",
+                  expiresIn: '7h',
                 });
                 res.json({ access_token: token, role: doc.role });
               }
                 break
               case 'super-admin': {
                 let token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.superAdminSecretKey, {
-                  expiresIn: "1h",
+                  expiresIn: '7h',
                 });
                 res.json({ access_token: token, role: doc.role });
               }

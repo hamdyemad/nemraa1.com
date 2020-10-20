@@ -10,8 +10,10 @@ const ProductSchema = mongoose.Schema({
     price: Number,
     discount: Number,
     unitPrice: Number,
+    facebookPexel: String,
     video: String,
     image: String,
+    sizes: Array,
     otherImages: {
         type: Array,
         default: []
@@ -22,7 +24,7 @@ const ProductSchema = mongoose.Schema({
     },
     addedDate: {
         type: String,
-        default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}`
+        default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
     }
 });
 
