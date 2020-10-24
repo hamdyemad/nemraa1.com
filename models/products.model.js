@@ -13,7 +13,10 @@ const ProductSchema = mongoose.Schema({
     facebookPexel: String,
     video: String,
     image: String,
-    sizes: Array,
+    sizes: {
+        type: Array,
+        default: []
+    },
     otherImages: {
         type: Array,
         default: []

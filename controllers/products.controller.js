@@ -52,6 +52,22 @@ exports.getProductsByOptions = (req, res) => {
   }
 }
 
+// GET get related product by category
+
+exports.getProductsByCategory = (req, res) => {
+  Product.find({ category: req.body.category, $nor: [{ _id: req.body.id }] }).then((doc) => {
+    const filterdDoc = doc.map(val => {
+      return {
+        _id: val._id,
+        seq: val.seq,
+        name: val.name,
+        image: val.image
+      }
+    })
+    res.json(filterdDoc);
+  })
+}
+
 // GET get product by id
 exports.getProductById = (req, res) => {
   let productId = req.params.id;
@@ -68,9 +84,11 @@ exports.addNewProduct = (req, res) => {
     if (doc) {
       res.json({ message: "يوجد منتج بهذاالأسم" });
       deleteImg(req.files.image[0].filename);
-      let images = req.files.otherImages.map(x => x.filename);
-      for (let image of images) {
-        deleteImg(image)
+      if (req.files.otherImages) {
+        const images = req.files.otherImages.map(x => x.filename);
+        for (let image of images) {
+          deleteImg(image)
+        }
       }
     } else {
       Product.findOneAndUpdate({ static: 'static' }, { $inc: { seq: 1 } }).then((doc) => {
@@ -100,6 +118,7 @@ exports.addNewProduct = (req, res) => {
           console.log(err)
         })
       })
+
     }
   })
     .catch((err) => {
@@ -111,7 +130,9 @@ exports.addNewProduct = (req, res) => {
 // PATCH update product
 exports.updateProduct = (req, res) => {
   const body = req.body;
-  console.log(req.files)
+  let sizes; (body.sizes) ? sizes = body.sizes : sizes = [];
+  let otherImages; (body.otherImages) ? otherImages = body.otherImages : otherImages = [];
+
   Product.findByIdAndUpdate(req.params.id, {
     name: body.name,
     description: body.description,
@@ -119,12 +140,12 @@ exports.updateProduct = (req, res) => {
     category: body.category,
     price: body.price,
     colors: body.colors,
-    sizes: body.sizes,
+    sizes: sizes,
     discount: body.discount,
     unitPrice: body.price - (body.price * body.discount / 100),
     video: body.video,
     image: body.image,
-    otherImages: body.otherImages
+    otherImages: otherImages
   }).then((doc) => {
     if (req.files.image) {
       Product.findByIdAndUpdate(req.params.id, {

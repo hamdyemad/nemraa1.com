@@ -26,11 +26,13 @@ router.post('/categorys', verfication.superAdminVerifyed, productsController.add
 // GET get product by options
 router.get('/', productsController.getProductsByOptions);
 
+router.post('/related', productsController.getProductsByCategory)
+
 // POST add new product
-router.post('/', upload, verfication.superAdminVerifyed, productsController.addNewProduct)
+router.post('/', verfication.superAdminVerifyed, upload, productsController.addNewProduct)
 
 // PATCH update product
-router.patch('/:id', upload, verfication.superAdminVerifyed, productsController.updateProduct);
+router.patch('/:id', verfication.superAdminVerifyed, upload, productsController.updateProduct);
 
 // DELETE delete product color
 router.patch('/colorAndSize/:id', verfication.superAdminVerifyed, productsController.deleteColorAndSize)

@@ -5,8 +5,12 @@ const ordersController = require("../controllers/orders.controller");
 /* POST add order  */
 router.post('/', ordersController.addOrder);
 
+/* POST post add orders with admin only */
+// router.post("/admins", verfication.adminVerifyed, ordersController.addOrderShowWithAdmin)
+
 /* GET get all orders && by query  */
 router.get("/", verfication.verifyed, ordersController.getAllOrders);
+
 
 /* GET get static */
 router.get('/static', verfication.verifyed, ordersController.getStatic);

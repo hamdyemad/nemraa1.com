@@ -46,7 +46,7 @@ exports.verifyed = (req, res, next) => {
                 next();
             }
         }
-        catch {
+        catch (err) {
             try {
                 let superAdminPayload = jwt.verify(authorization, process.env.superAdminSecretKey);
                 if (superAdminPayload) {
@@ -54,7 +54,7 @@ exports.verifyed = (req, res, next) => {
                     next();
                 }
             }
-            catch {
+            catch (err) {
                 res.sendStatus(401);
             }
         }

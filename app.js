@@ -9,7 +9,7 @@ const productRoute = require('./routes/products.route');
 const authRoute = require('./routes/auth.route');
 const orderRoute = require('./routes/order.route');
 
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'images')));
 app.use((req, res, next) => {

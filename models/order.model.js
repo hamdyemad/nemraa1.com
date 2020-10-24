@@ -38,7 +38,16 @@ const orderSchema = mongoose.Schema({
     addedDate: {
         type: String,
         default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
-    }
+    },
+    // adminVerfied: [
+    //     {
+    //         show: {
+    //             type: Boolean,
+    //             default: false
+    //         },
+    //         adminId: String
+    //     }
+    // ]
 });
 const Order = mongoose.model('order', orderSchema);
 

@@ -52,6 +52,16 @@ exports.getAllOrders = (req, res) => {
     }
 };
 
+/* GET get all orders with admin  */
+// exports.addOrderShowWithAdmin = (req, res) => {
+//     Order.findOneAndUpdate({_id: req.body.id}, {
+//         adminVerfied: {
+//             show: Boolean,
+//             adminId: String
+//         }
+//     })
+// };
+
 /* GET get static*/
 exports.getStatic = (req, res) => {
     Order.findOne({ static: 'static' }).then((doc) => {
