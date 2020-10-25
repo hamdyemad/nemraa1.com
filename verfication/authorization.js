@@ -7,6 +7,7 @@ exports.adminVerifyed = (req, res, next) => {
             let payload = jwt.verify(authorization, process.env.adminSecretKey);
             if (payload) {
                 req.adminId = payload.adminId;
+                req.role = payload.role;
                 next();
             }
         } catch (err) {
@@ -25,6 +26,7 @@ exports.superAdminVerifyed = (req, res, next) => {
             let payload = jwt.verify(authorization, process.env.superAdminSecretKey);
             if (payload) {
                 req.adminId = payload.adminId;
+                req.role = payload.role;
                 next();
             }
         } catch (err) {
@@ -41,16 +43,20 @@ exports.verifyed = (req, res, next) => {
     if (authorization) {
         try {
             let adminPayload = jwt.verify(authorization, process.env.adminSecretKey);
+
             if (adminPayload) {
                 req.adminId = adminPayload.adminId;
+                req.role = adminPayload.role;
                 next();
             }
         }
         catch (err) {
             try {
                 let superAdminPayload = jwt.verify(authorization, process.env.superAdminSecretKey);
+
                 if (superAdminPayload) {
                     req.adminId = superAdminPayload.adminId;
+                    req.role = superAdminPayload.role;
                     next();
                 }
             }

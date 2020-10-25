@@ -3,13 +3,16 @@ const authController = require("../controllers/auth.controller");
 const verfication = require('../verfication/authorization');
 
 /* POST register */
-router.post("/register", verfication.superAdminVerifyed, authController.register);
+router.post("/register", authController.register);
 
 /* POST login */
 router.post("/login", authController.login);
 
 /* GET get all admins */
 router.get('/admins', verfication.superAdminVerifyed, authController.getAllAdmins);
+
+/* GET get specific admins */
+router.post('/admins/specific', verfication.superAdminVerifyed, authController.getSpecificAdmins)
 
 /* GET get admin info */
 router.get('/admin', verfication.verifyed, authController.getAdminInfo)

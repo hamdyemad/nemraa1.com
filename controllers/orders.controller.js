@@ -1,4 +1,5 @@
 const Order = require('../models/order.model');
+const authModel = require('../models/auth.model');
 /* POST Add new order but before we add the order we increament the sequence value and pass the end value to the newest order */
 exports.addOrder = (req, res) => {
     Order.findOneAndUpdate({ static: 'static' }, { $inc: { seq: 1 } }).then((value) => {
@@ -30,37 +31,77 @@ exports.addOrder = (req, res) => {
 /* GET get all orders  */
 exports.getAllOrders = (req, res) => {
     let query = req.query;
-    if (Object.keys(query).length !== 0) {
-        Order.find({
-            $or: [
-                { seq: query.seq },
-                { "clientInfo.name": new RegExp(`^${query.name}`) },
-                { "clientInfo.city": query.city },
-                { status: query.status },
-                { addedDate: query.addedDate },
-            ],
-            $nor: [{ static: 'static' }]
-        }).sort({ seq: -1 })
-            .then((doc) => {
-                res.json(doc);
-            })
+    if (req.role == 'super-admin') {
+        if (Object.keys(query).length !== 0) {
+            Order.find({
+                $or: [
+                    { seq: query.seq },
+                    { "clientInfo.name": new RegExp(`^${query.name}`) },
+                    { "clientInfo.city": query.city },
+                    { status: query.status },
+                    { addedDate: query.addedDate },
+                ],
+                $nor: [{ static: 'static' }]
+            }).sort({ seq: -1 })
+                .then((doc) => {
+                    res.json(doc);
+                })
+        } else {
+            Order.find({ $nor: [{ static: 'static' }] }).sort({ seq: -1 })
+                .then((value) => {
+                    res.json(value);
+                })
+        }
     } else {
-        Order.find({ $nor: [{ static: 'static' }] }).sort({ seq: -1 })
-            .then((value) => {
-                res.json(value);
-            })
+        if (Object.keys(query).length !== 0) {
+            Order.find({
+                $or: [
+                    { seq: query.seq },
+                    { "clientInfo.name": new RegExp(`^${query.name}`) },
+                    { "clientInfo.city": query.city },
+                    { status: query.status },
+                    { addedDate: query.addedDate }
+                ],
+                $nor: [{ static: 'static' }, { "adminVerfied.adminId": { $ne: req.adminId } }]
+            }).sort({ seq: -1 })
+                .then((doc) => {
+                    res.json(doc);
+                })
+        } else {
+            Order.find({ $nor: [{ static: 'static' }], "adminVerfied.adminId": { $eq: req.adminId } }).sort({ seq: -1 })
+                .then((value) => {
+                    res.json(value);
+                })
+        }
     }
 };
 
-/* GET get all orders with admin  */
-// exports.addOrderShowWithAdmin = (req, res) => {
-//     Order.findOneAndUpdate({_id: req.body.id}, {
-//         adminVerfied: {
-//             show: Boolean,
-//             adminId: String
-//         }
-//     })
-// };
+/* POST add order with admin view by pass the adminId to adminVerfied  */
+exports.addOrderShowWithAdmin = (req, res) => {
+    authModel.findById(req.body.adminId).then(doc => {
+        if (doc) {
+            Order.findOneAndUpdate({ _id: req.body.orderId }, {
+                $addToSet: {
+                    adminVerfied: { adminId: req.body.adminId, email: doc.email }
+                }
+            }).then(doc => {
+                res.json(doc);
+            })
+
+        }
+    })
+};
+
+/* DELETE remove order with admin view by pass the adminId to adminVerfied  */
+exports.removeOrderShowWithAdmin = (req, res) => {
+    Order.findOneAndUpdate({ _id: req.body.orderId }, {
+        $pull: {
+            adminVerfied: { adminId: req.body.adminId }
+        }
+    }).then(doc => {
+        res.json(doc);
+    })
+};
 
 /* GET get static*/
 exports.getStatic = (req, res) => {
@@ -113,6 +154,18 @@ exports.addStatusHistory = (req, res) => {
             res.json(value);
         })
 }
+/* POST add array of history */
+exports.addManyOfHistory = (req, res) => {
+    const body = req.body;
+    const history = body.history;
+    Order.updateMany({ $or: body.seqs, $nor: [{ static: 'static' }] }, {
+        $push: { statusHistory: history },
+        status: history.status
+    }).then((value) => {
+        res.json(value);
+    })
+}
+
 
 /* GET get Invoices by passing the seqs of orders i checked it's about array of id's like: [1, 4, 9, etc..]; */
 exports.getOrdersByPassTheSeqs = (req, res) => {

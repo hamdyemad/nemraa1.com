@@ -5,8 +5,11 @@ const ordersController = require("../controllers/orders.controller");
 /* POST add order  */
 router.post('/', ordersController.addOrder);
 
-/* POST post add orders with admin only */
-// router.post("/admins", verfication.adminVerifyed, ordersController.addOrderShowWithAdmin)
+/* POST post add orders to admins view */
+router.post("/admins", verfication.superAdminVerifyed, ordersController.addOrderShowWithAdmin)
+
+/* PATCH update orders to admins view */
+router.patch('/admins', verfication.superAdminVerifyed, ordersController.removeOrderShowWithAdmin)
 
 /* GET get all orders && by query  */
 router.get("/", verfication.verifyed, ordersController.getAllOrders);
@@ -35,6 +38,9 @@ router.patch('/:id', verfication.superAdminVerifyed, ordersController.editOrder)
 router.delete('/:id', verfication.superAdminVerifyed, ordersController.deleteOrderById);
 
 /* POST add status histroy */
-router.post('/history/:id', verfication.verifyed, ordersController.addStatusHistory);
+router.post('/history/details/:id', verfication.verifyed, ordersController.addStatusHistory);
+
+/* POST add many of history */
+router.post('/history', verfication.verifyed, ordersController.addManyOfHistory)
 
 module.exports = router;

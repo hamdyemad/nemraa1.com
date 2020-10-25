@@ -75,6 +75,19 @@ exports.getAllAdmins = (req, res) => {
     res.json(doc);
   })
 }
+// get specific admins with ids
+exports.getSpecificAdmins = (req, res) => {
+  if (Object.keys(req.body).length !== 0) {
+    const ids = req.body;
+    const idsArr = [];
+    for (let id of ids) {
+      idsArr.push({ _id: id })
+    }
+    authModel.find({ $or: idsArr }).then(doc => {
+      res.json(doc);
+    })
+  }
+}
 
 // get admin info
 exports.getAdminInfo = (req, res) => {
