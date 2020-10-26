@@ -6,8 +6,11 @@ const orderSchema = mongoose.Schema({
     cities: Array,
     statuses: Array,
     order: {
-        seq: Number,
+        productId: String,
+        productSeq: Number,
         category: String,
+        choosedColor: String,
+        choosedSize: String,
         name: String,
         image: String,
         price: Number,
@@ -15,8 +18,10 @@ const orderSchema = mongoose.Schema({
         discount: Number,
         totalPrice: Number,
         amount: Number,
-        choosedColor: String,
-        choosedSize: String
+        orderDiscount: {
+            type: Number,
+            default: 0
+        }
     },
     status: {
         type: String,

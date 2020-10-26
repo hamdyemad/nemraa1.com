@@ -127,7 +127,15 @@ exports.getOrderById = (req, res) => {
 /* PATCh update order by id */
 exports.editOrder = (req, res) => {
     Order.findByIdAndUpdate(req.params.id, {
-        'order.totalPrice': req.body.totalPrice
+        'clientInfo.name': req.body.name,
+        'clientInfo.mobile': req.body.mobile,
+        'clientInfo.address': req.body.address,
+        'order.choosedColor': req.body.color,
+        'order.choosedSize': req.body.size,
+        'order.unitPrice': req.body.unitPrice,
+        'order.amount': req.body.amount,
+        'order.orderDiscount': req.body.orderDiscount,
+        'order.totalPrice': ((req.body.amount * req.body.unitPrice) - req.body.orderDiscount)
     }).then((doc) => {
         res.json(doc);
     })
@@ -149,7 +157,7 @@ exports.addStatusHistory = (req, res) => {
         {
             $push: { statusHistory: history },
             status: history.status,
-            comment: history.comment
+            "clientInfo.comment": history.comment
         }).then((value) => {
             res.json(value);
         })
