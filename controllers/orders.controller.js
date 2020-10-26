@@ -158,20 +158,36 @@ exports.addStatusHistory = (req, res) => {
 exports.addManyOfHistory = (req, res) => {
     const body = req.body;
     const history = body.history;
-    Order.updateMany({ $or: body.seqs, $nor: [{ static: 'static' }] }, {
-        $push: { statusHistory: history },
-        status: history.status
-    }).then((value) => {
-        res.json(value);
-    })
+    if (req.role == 'super-admin') {
+        Order.updateMany({ $or: body.seqs, $nor: [{ static: 'static' }] }, {
+            $push: { statusHistory: history },
+            status: history.status
+        }).then((value) => {
+            res.json(value);
+        })
+    } else {
+        Order.updateMany({ $or: body.seqs, $nor: [{ static: 'static' }], "adminVerfied.adminId": { $eq: req.adminId } }, {
+            $push: { statusHistory: history },
+            status: history.status
+        }).then((value) => {
+            res.json(value);
+        })
+    }
 }
 
 
 /* GET get Invoices by passing the seqs of orders i checked it's about array of id's like: [1, 4, 9, etc..]; */
 exports.getOrdersByPassTheSeqs = (req, res) => {
     let seqs = req.body;
-    Order.find({ $nor: [{ static: 'static' }], seq: { $in: seqs } })
-        .then((value) => {
-            res.json(value);
-        })
+    if (req.role == 'super-admin') {
+        Order.find({ $nor: [{ static: 'static' }], seq: { $in: seqs } })
+            .then((value) => {
+                res.json(value);
+            })
+    } else {
+        Order.find({ $nor: [{ static: 'static' }], "adminVerfied.adminId": { $eq: req.adminId }, seq: { $in: seqs } })
+            .then((value) => {
+                res.json(value);
+            })
+    }
 }
