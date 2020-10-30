@@ -7,6 +7,8 @@ const authModel = require('../models/auth.model');
 // POST register
 exports.register = (req, res) => {
   const body = req.body;
+  body.email = body.email.toLowerCase();
+  body.password = body.password.toLowerCase();
   authModel.findOne({ email: body.email }).then((doc) => {
     if (doc) res.json({ message: 'هذا المستخدم مسجل بالفعل' })
     else {
@@ -27,11 +29,14 @@ exports.register = (req, res) => {
       })
     }
   })
+
 }
 
 // POST login
 exports.login = (req, res) => {
   const body = req.body;
+  body.email = body.email.toLowerCase();
+  body.password = body.password.toLowerCase();
   authModel.findOne({ email: body.email }).then((doc) => {
     if (!doc) {
       res.json({ emailMessage: "الايميل الذي ادخلته خطأ" })
