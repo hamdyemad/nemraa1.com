@@ -20,10 +20,13 @@ exports.register = (req, res) => {
           password: hashedPassword
         })
         newAuth.save().then((doc) => {
-          const token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.adminSecretKey, {
-            expiresIn: '7h'
-          })
-          res.json({ access_token: token, role: doc.role });
+          if (body.role == 'super-admin') {
+            authModel.updateOne({ email: body.email }, { role: 'super-admin' }).then(() => {
+              res.json({ message: `تم اضافة ${body.firstName} ${body.lastName} الى قائمة الأدمنز` });
+            })
+          } else {
+            res.json({ message: `تم اضافة ${body.firstName} ${body.lastName} الى قائمة المشرفين` });
+          }
         })
           .catch(err => res.json(err))
       })

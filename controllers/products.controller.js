@@ -3,7 +3,6 @@ const fs = require('fs');
 // Delete Img fn
 function deleteImg(img) {
   fs.unlink(`images/${img}`, (err) => {
-    console.log('image has been removed');
     if (err) console.log(err, 'err');
   })
 }
@@ -84,6 +83,12 @@ exports.addNewProduct = (req, res) => {
     if (doc) {
       res.json({ message: "يوجد منتج بهذاالأسم" });
       deleteImg(req.files.image[0].filename);
+      if (req.files.reviews) {
+        const reviewsImages = req.files.reviews.map(x => x.filename);
+        for (let review of reviewsImages) {
+          deleteImg(review)
+        }
+      }
       if (req.files.otherImages) {
         const images = req.files.otherImages.map(x => x.filename);
         for (let image of images) {
@@ -102,13 +107,21 @@ exports.addNewProduct = (req, res) => {
           category: body.category,
           price: body.price,
           discount: body.discount,
-          unitPrice: body.price - (body.price * body.discount / 100),
+          unitPrice: (body.price - body.discount),
           video: body.video,
           image: req.files.image[0].filename
         });
         newProduct.save().then((doc) => {
           if (req.files.otherImages) {
             Product.findOneAndUpdate({ _id: doc._id }, { otherImages: req.files.otherImages.map(x => x.filename) }).then()
+          }
+          if (req.files.reviews) {
+            for (let i = 0; i < req.files.reviews.length; i++) {
+              body.reviews[i].reviewerImage = req.files.reviews[i].filename
+            }
+            Product.findOneAndUpdate({ _id: doc._id },
+              { $push: { reviews: body.reviews } }).then()
+
           }
           Product.findOneAndUpdate({ static: 'static' }, { $addToSet: { _categorys: [body.category] } })
             .then(() => {
@@ -142,7 +155,7 @@ exports.updateProduct = (req, res) => {
     colors: body.colors,
     sizes: sizes,
     discount: body.discount,
-    unitPrice: body.price - (body.price * body.discount / 100),
+    unitPrice: (body.price - body.discount),
     video: body.video,
     image: body.image,
     otherImages: otherImages
@@ -152,8 +165,16 @@ exports.updateProduct = (req, res) => {
         image: req.files.image[0].filename
       }).then((resImage) => {
         deleteImg(doc.image);
-        console.log(resImage, 'main image deleted')
+        console.log('main image deleted')
       })
+    }
+    if (req.files.reviews) {
+      for (let i = 0; i < req.files.reviews.length; i++) {
+        body.reviews[i].reviewerImage = req.files.reviews[i].filename;
+        Product.findByIdAndUpdate(req.params.id, {
+          $push: { reviews: body.reviews[i] }
+        }).then()
+      }
     }
     if (req.files.otherImages) {
       Product.findByIdAndUpdate(req.params.id, {
@@ -162,7 +183,7 @@ exports.updateProduct = (req, res) => {
         for (let image of doc.otherImages) {
           deleteImg(image);
         }
-        console.log(resOtherImages, 'otherImages deleted')
+        console.log('otherImages deleted')
       })
     }
     res.json(doc);
@@ -175,6 +196,9 @@ exports.deleteProduct = (req, res) => {
   Product.findOne({ _id: req.params.id }).then((doc) => {
     if (doc) {
       deleteImg(doc.image);
+      for (let review of doc.reviews) {
+        deleteImg(review.reviewerImage)
+      }
       for (let image of doc.otherImages) {
         deleteImg(image);
       }
@@ -185,11 +209,23 @@ exports.deleteProduct = (req, res) => {
   })
 }
 
-// DELETE delete color by id
+// DELETE delete color & size by id
 exports.deleteColorAndSize = (req, res) => {
   Product.findByIdAndUpdate(req.params.id, {
     $pull: { colors: req.body.color, sizes: req.body.size }
   }).then((doc) => {
     res.json(doc);
+  })
+}
+
+// DELETE reviews by id
+exports.deleteReview = (req, res) => {
+  Product.findById(req.params.id).then(doc => {
+    Product.updateOne({ _id: doc._id }, {
+      $pull: { reviews: { reviewerName: req.body.reviewerName } }
+    }).then(val => {
+      deleteImg(req.body.reviewerImage);
+      res.json(val);
+    })
   })
 }

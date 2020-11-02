@@ -14,7 +14,8 @@ let storage = multer.diskStorage({
 })
 const upload = multer({ storage }).fields([
     { name: 'image' },
-    { name: 'otherImages' }
+    { name: 'otherImages' },
+    { name: 'reviews' }
 ])
 
 // GET get all categorys
@@ -29,13 +30,16 @@ router.get('/', productsController.getProductsByOptions);
 router.post('/related', productsController.getProductsByCategory)
 
 // POST add new product
-router.post('/', verfication.superAdminVerifyed, upload, productsController.addNewProduct)
+router.post('/', upload, productsController.addNewProduct)
 
 // PATCH update product
 router.patch('/:id', verfication.superAdminVerifyed, upload, productsController.updateProduct);
 
 // DELETE delete product color
 router.patch('/colorAndSize/:id', verfication.superAdminVerifyed, productsController.deleteColorAndSize)
+
+// DELETE reviews by id
+router.patch('/reviews/:id', productsController.deleteReview)
 
 
 // GET get product by id

@@ -135,7 +135,7 @@ exports.editOrder = (req, res) => {
         'order.unitPrice': req.body.unitPrice,
         'order.amount': req.body.amount,
         'order.orderDiscount': req.body.orderDiscount,
-        'order.totalPrice': ((req.body.amount * req.body.unitPrice) - req.body.orderDiscount)
+        'order.totalPrice': (req.body.amount * req.body.unitPrice) - req.body.orderDiscount
     }).then((doc) => {
         res.json(doc);
     })
