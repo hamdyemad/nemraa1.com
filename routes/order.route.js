@@ -14,6 +14,9 @@ router.patch('/admins', verfication.superAdminVerifyed, ordersController.removeO
 /* GET get all orders && by query  */
 router.get("/", verfication.verifyed, ordersController.getAllOrders);
 
+/* GET get all completed orders */
+router.get("/completed", verfication.verifyed, ordersController.getAllCompletedOrders);
+
 
 /* GET get static */
 router.get('/static', verfication.verifyed, ordersController.getStatic);

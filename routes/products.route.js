@@ -30,7 +30,10 @@ router.get('/', productsController.getProductsByOptions);
 router.post('/related', productsController.getProductsByCategory)
 
 // POST add new product
-router.post('/', upload, productsController.addNewProduct)
+router.post('/', upload, productsController.addNewProduct);
+
+// PATCH update static
+router.patch('/static', productsController.updateStatic);
 
 // PATCH update product
 router.patch('/:id', verfication.superAdminVerifyed, upload, productsController.updateProduct);

@@ -26,6 +26,26 @@ exports.addNewCategory = (req, res) => {
     })
 }
 
+// update category of static
+exports.updateStatic = (req, res) => {
+  const body = req.body;
+  if (body.title == 'update') {
+    objUpdate = { $pull: { _categorys: body.category } }
+  } else {
+    objUpdate = { $push: { _categorys: body.category } }
+  }
+  Product.findOneAndUpdate({ static: 'static' }, objUpdate).then((doc) => {
+    let removed = 'تم مسحه',
+      success = 'تم اضافته بنجاح !';
+    if (doc && body.title == 'update') {
+      res.json({ message: `${body.category} has been ${removed}` })
+    } else {
+      res.json({ message: `${body.category} has been ${success}` })
+    }
+  })
+}
+
+
 // GET get product by options
 exports.getProductsByOptions = (req, res) => {
   let query = req.query;
@@ -190,6 +210,7 @@ exports.updateProduct = (req, res) => {
   })
     .catch()
 }
+
 
 // DELETE delete product by id
 exports.deleteProduct = (req, res) => {

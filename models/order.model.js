@@ -40,6 +40,7 @@ const orderSchema = mongoose.Schema({
         type: Array,
         default: []
     },
+    updatedDate: Date,
     addedDate: {
         type: String,
         default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
