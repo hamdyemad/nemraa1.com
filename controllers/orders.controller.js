@@ -1,28 +1,29 @@
 const Order = require('../models/order.model');
 const authModel = require('../models/auth.model');
+const Product = require('../models/products.model');
+const { find } = require('../models/order.model');
 /* POST Add new order but before we add the order we increament the sequence value and pass the end value to the newest order */
 exports.addOrder = (req, res) => {
   Order.findOneAndUpdate({ static: 'static' }, { $inc: { seq: 1 } }).then((value) => {
     let seq = value.seq;
     const body = req.body;
-    const orderObj = req.body.order;
-    orderObj.totalPrice = orderObj.unitPrice * orderObj.amount
-    let newOrder = new Order({
-      seq: seq,
-      order: orderObj,
-      clientInfo: {
-        name: body.clientInfo.name,
-        address: body.clientInfo.address,
-        mobile: body.clientInfo.mobile,
-        city: body.clientInfo.city,
-        comment: body.clientInfo.comment,
-      }
-    });
+    const products = body.products;
+
+    for (let product of products) {
+      Product.findById(product.productId).then((doc) => {
+        Product.updateOne({ _id: doc._id }, { amount: doc.amount - product.totalAmount }).then()
+      })
+    }
+    body['seq'] = seq;
+    body['orderPrice'] = products.map((product) => {
+      return product.totalPrice
+    }).reduce((acc, current) => acc + current);
+    let newOrder = new Order(body);
     newOrder
       .save()
       .then((doc) => {
         Order.findOneAndUpdate({ static: 'static' }, { $addToSet: { cities: doc.clientInfo.city } }).then(() => {
-          res.json(doc);
+          res.json({ message: `تم اضافة طلب ${doc.clientInfo.clientName} بنجاح` });
         });
       })
   })
@@ -38,49 +39,26 @@ exports.getAllCompletedOrders = (req, res) => {
 /* GET get all orders  */
 exports.getAllOrders = (req, res) => {
   let query = req.query;
-  if (req.role == 'super-admin') {
-    if (Object.keys(query).length !== 0) {
-      Order.find({
-        $or: [
-          { seq: query.seq },
-          { "clientInfo.name": new RegExp(`^${query.name}`) },
-          { "clientInfo.mobile": query.mobile },
-          { "clientInfo.city": query.city },
-          { status: query.status },
-          { addedDate: query.addedDate },
-        ],
-        $nor: [{ static: 'static' }]
-      }).sort({ seq: -1 })
-        .then((doc) => {
-          res.json(doc);
-        })
-    } else {
-      Order.find({ $nor: [{ static: 'static' }] }).sort({ seq: -1 })
-        .then((value) => {
-          res.json(value);
-        })
-    }
+  if (Object.keys(query).length !== 0) {
+    let findObj = { $nor: [{ static: 'static' }] };
+    findObj.$and = [];
+    Object.keys(query).forEach((q) => {
+      let quertValue = query[q];
+      if (q == 'clientName' || q == 'mobile' || q == 'city') {
+        findObj.$and.push({ [`clientInfo.${[q]}`]: new RegExp(`^${quertValue}`) });
+      } else {
+        findObj.$and.push({ [`${[q]}`]: quertValue });
+      }
+    })
+    Order.find(findObj).sort({ seq: -1 })
+      .then((doc) => {
+        res.json(doc);
+      })
   } else {
-    if (Object.keys(query).length !== 0) {
-      Order.find({
-        $or: [
-          { seq: query.seq },
-          { "clientInfo.name": new RegExp(`^${query.name}`) },
-          { "clientInfo.city": query.city },
-          { status: query.status },
-          { addedDate: query.addedDate }
-        ],
-        $nor: [{ static: 'static' }, { "adminVerfied.adminId": { $ne: req.adminId } }]
-      }).sort({ seq: -1 })
-        .then((doc) => {
-          res.json(doc);
-        })
-    } else {
-      Order.find({ $nor: [{ static: 'static' }], "adminVerfied.adminId": { $eq: req.adminId } }).sort({ seq: -1 })
-        .then((value) => {
-          res.json(value);
-        })
-    }
+    Order.find({ $nor: [{ static: 'static' }] }).sort({ seq: -1 })
+      .then((value) => {
+        res.json(value);
+      })
   }
 };
 
@@ -159,17 +137,29 @@ exports.deleteOrderById = (req, res) => {
 /* POST add status histroy */
 exports.addStatusHistory = (req, res) => {
   const date = new Date();
-  const history = req.body;
+  const body = req.body;
+  let history = {};
+  history.notes = body.notes
   history.updatedDate = date;
-  Order.findByIdAndUpdate(req.params.id,
-    {
-      $push: { statusHistory: history },
-      status: history.status,
-      updatedDate: date,
-      "clientInfo.comment": history.comment
-    }).then((value) => {
-      res.json(value);
+  // get static
+  Order.findOne({ static: 'static' }).then((doc) => {
+    history['statusInfo'] = doc.statuses.find((statObj) => {
+      if (statObj.status == body.status) {
+        return statObj
+      }
     })
+  }).then(() => {
+    Order.updateOne({ _id: req.params.id },
+      {
+        $push: { statusHistory: history },
+        'statusInfo.status': history.statusInfo.status,
+        'statusInfo.color': history.statusInfo.color,
+        updatedDate: date,
+        "clientInfo.notes": history.notes
+      }).then((value) => {
+        res.json(value);
+      })
+  })
 }
 /* POST add array of history */
 exports.addManyOfHistory = (req, res) => {

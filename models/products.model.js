@@ -1,17 +1,26 @@
 const mongoose = require('mongoose');
+
+let doDate = (number) => {
+    return (+number < 10) ? number = `${0}${number}` : '';
+}
 let date = new Date();
+let month = `${date.getMonth() + 1}`;
+let day = `${date.getDate()}`;
+month = doDate(month);
+day = doDate(day);
 const ProductSchema = mongoose.Schema({
     seq: Number,
     static: String,
-    _categorys: Array,
+    _categories: Array,
     category: String,
     name: String,
     description: String,
     price: Number,
     discount: Number,
     unitPrice: Number,
+    amount: Number,
     facebookPexel: String,
-    video: String,
+    youtubeVideo: String,
     image: String,
     reviews: {
         type: Array,
@@ -21,17 +30,17 @@ const ProductSchema = mongoose.Schema({
         type: Array,
         default: []
     },
-    otherImages: {
+    colors: {
         type: Array,
         default: []
     },
-    colors: {
+    otherImages: {
         type: Array,
         default: []
     },
     addedDate: {
         type: String,
-        default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+        default: `${date.getFullYear()}-${month}-${day}`
     }
 });
 

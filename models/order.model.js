@@ -1,39 +1,49 @@
 const mongoose = require('mongoose');
-const date = new Date();
+const defaultStatusColor = '#ccd53d';
+let doDate = (number) => {
+    return (+number < 10) ? number = `${0}${number}` : '';
+}
+let date = new Date();
+let month = `${date.getMonth() + 1}`;
+let day = `${date.getDate()}`;
+month = doDate(month);
+day = doDate(day);
 const orderSchema = mongoose.Schema({
     seq: Number,
     static: String,
     cities: Array,
     statuses: Array,
-    order: {
-        productId: String,
-        productSeq: Number,
-        category: String,
-        choosedColor: String,
-        choosedSize: String,
-        name: String,
-        image: String,
-        price: Number,
-        unitPrice: Number,
-        discount: Number,
-        totalPrice: Number,
-        amount: Number,
-        orderDiscount: {
-            type: Number,
-            default: 0
+    orderPrice: Number,
+    products: [
+        {
+            productId: String,
+            productSeq: Number,
+            name: String,
+            image: String,
+            category: String,
+            productInfo: [],
+            unitPrice: Number,
+            totalPrice: Number,
+            totalAmount: Number,
         }
-    },
-    status: {
-        type: String,
-        default: 'معلق'
+    ],
+    statusInfo: {
+        status: {
+            type: String,
+            default: 'معلق'
+        },
+        color: {
+            type: String,
+            default: defaultStatusColor
+        }
     },
     // client info
     clientInfo: {
-        name: String,
+        clientName: String,
         address: String,
         mobile: String,
         city: String,
-        comment: String
+        notes: String
     },
     // client info
     statusHistory: {
@@ -43,9 +53,8 @@ const orderSchema = mongoose.Schema({
     updatedDate: Date,
     addedDate: {
         type: String,
-        default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
-    },
-    adminVerfied: []
+        default: `${date.getFullYear()}-${month}-${day}`
+    }
 });
 const Order = mongoose.model('order', orderSchema);
 

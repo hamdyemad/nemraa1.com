@@ -14,25 +14,13 @@ exports.getAllCategorys = (req, res) => {
   })
 }
 
-// POST add new category
-exports.addNewCategory = (req, res) => {
-  Product.findOneAndUpdate({ static: 'static' }, {
-    $addToSet: {
-      _categorys: req.body.newCategory
-    }
-  })
-    .then((doc) => {
-      res.json(doc);
-    })
-}
-
 // update category of static
 exports.updateStatic = (req, res) => {
   const body = req.body;
   if (body.title == 'update') {
-    objUpdate = { $pull: { _categorys: body.category } }
+    objUpdate = { $pull: { _categories: body.category } }
   } else {
-    objUpdate = { $push: { _categorys: body.category } }
+    objUpdate = { $push: { _categories: body.category } }
   }
   Product.findOneAndUpdate({ static: 'static' }, objUpdate).then((doc) => {
     let removed = 'تم مسحه',
@@ -126,6 +114,7 @@ exports.addNewProduct = (req, res) => {
           sizes: body.sizes,
           category: body.category,
           price: body.price,
+          amount: body.amount,
           discount: body.discount,
           unitPrice: (body.price - body.discount),
           video: body.video,
@@ -143,7 +132,7 @@ exports.addNewProduct = (req, res) => {
               { $push: { reviews: body.reviews } }).then()
 
           }
-          Product.findOneAndUpdate({ static: 'static' }, { $addToSet: { _categorys: [body.category] } })
+          Product.findOneAndUpdate({ static: 'static' }, { $addToSet: { _categories: [body.category] } })
             .then(() => {
               res.json(doc)
             })
@@ -172,6 +161,7 @@ exports.updateProduct = (req, res) => {
     facebookPexel: body.facebookPexel,
     category: body.category,
     price: body.price,
+    amount: body.amount,
     colors: body.colors,
     sizes: sizes,
     discount: body.discount,

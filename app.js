@@ -9,6 +9,8 @@ const productRoute = require('./routes/products.route');
 const authRoute = require('./routes/auth.route');
 const orderRoute = require('./routes/order.route');
 const homeRoute = require('./routes/home.route');
+const egyptRoute = require('./routes/egypt.route');
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,6 +26,7 @@ app.use('/products', productRoute);
 app.use(authRoute);
 app.use('/orders', orderRoute);
 app.use(homeRoute)
+app.use('/egypt', egyptRoute)
 
 
 

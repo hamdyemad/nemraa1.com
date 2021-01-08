@@ -18,12 +18,6 @@ const upload = multer({ storage }).fields([
     { name: 'reviews' }
 ])
 
-// GET get all categorys
-router.get('/categorys', productsController.getAllCategorys)
-
-// POST add new category
-router.post('/categorys', verfication.superAdminVerifyed, productsController.addNewCategory)
-
 // GET get product by options
 router.get('/', productsController.getProductsByOptions);
 
@@ -32,6 +26,8 @@ router.post('/related', productsController.getProductsByCategory)
 // POST add new product
 router.post('/', upload, productsController.addNewProduct);
 
+// GET get static
+router.get('/static', productsController.getAllCategorys);
 // PATCH update static
 router.patch('/static', productsController.updateStatic);
 
