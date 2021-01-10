@@ -14,6 +14,8 @@ const orderSchema = mongoose.Schema({
     cities: Array,
     statuses: Array,
     orderPrice: Number,
+    shipping: Number,
+    orderShippingPrice: Number,
     products: [
         {
             productId: String,
