@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 let doDate = (number) => {
-    return (+number < 10) ? number = `${0}${number}` : '';
+    return (+number < 10) ? number = `${0}${number}` : number;
 }
 let date = new Date();
 let month = `${date.getMonth() + 1}`;

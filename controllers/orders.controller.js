@@ -1,5 +1,4 @@
 const Order = require('../models/order.model');
-const authModel = require('../models/auth.model');
 const Product = require('../models/products.model');
 /* POST Add new order but before we add the order we increament the sequence value and pass the end value to the newest order */
 exports.addOrder = (req, res) => {
@@ -7,6 +6,7 @@ exports.addOrder = (req, res) => {
     let seq = value.seq;
     const body = req.body;
     const products = body.products;
+    let io = req.app.get('io');
 
     for (let product of products) {
       Product.findById(product.productId).then((doc) => {
@@ -23,21 +23,37 @@ exports.addOrder = (req, res) => {
       .save()
       .then((doc) => {
         Order.findOneAndUpdate({ static: 'static' }, { $addToSet: { cities: doc.clientInfo.city } }).then(() => {
+          io.emit('orders');
           res.json({ message: `تم اضافة طلب ${doc.clientInfo.clientName} بنجاح` });
         });
       })
   })
 };
 
-// get All completed orders by date
-exports.getAllCompletedOrders = (req, res) => {
-  Order.find({}).sort({ updatedDate: -1 }).then((doc) => {
-    res.json(doc);
-  })
-}
+/* PATCH update order by id */
+exports.updateOrderById = (req, res) => {
+  const body = req.body;
+  let io = req.app.get('io');
 
-/* GET get all orders  */
-exports.getAllOrders = (req, res) => {
+  Order.findById(req.params.id).then((doc) => {
+    Order.updateOne({ _id: doc._id }, {
+      'clientInfo.clientName': body.clientInfo.clientName,
+      'clientInfo.mobile': body.clientInfo.mobile,
+      'clientInfo.city': body.clientInfo.city,
+      'clientInfo.address': body.clientInfo.address,
+      'clientInfo.notes': body.clientInfo.notes,
+      shipping: body.shipping,
+      products: body.products
+    }).then((val) => {
+      io.emit('orders')
+      res.json({ message: `تم تعديل ${body.clientInfo.clientName} بنجاح` });
+    })
+  })
+};
+
+
+/* GET get orders all and query */
+exports.getOrders = (req, res) => {
   let query = req.query;
   if (Object.keys(query).length !== 0) {
     let findObj = { $nor: [{ static: 'static' }] };
@@ -87,7 +103,10 @@ exports.getOrderById = (req, res) => {
 
 /* DELETE delete order by id */
 exports.deleteOrderById = (req, res) => {
+  let io = req.app.get('io');
+
   Order.findByIdAndDelete(req.params.id).then((doc) => {
+    io.emit('orders')
     res.json(doc);
   })
 }
@@ -96,6 +115,8 @@ exports.deleteOrderById = (req, res) => {
 exports.addStatusHistory = (req, res) => {
   const date = new Date();
   const body = req.body;
+  let io = req.app.get('io');
+
   let history = {};
   history.notes = body.notes
   history.updatedDate = date;
@@ -115,6 +136,7 @@ exports.addStatusHistory = (req, res) => {
         updatedDate: date,
         "clientInfo.notes": history.notes
       }).then((value) => {
+        io.emit('orders')
         res.json(value);
       })
   })
@@ -123,6 +145,7 @@ exports.addStatusHistory = (req, res) => {
 exports.addManyOfHistory = (req, res) => {
   let date = new Date();
   const body = req.body;
+  let io = req.app.get('io');
   let history = { statusInfo: body.statusInfo };
   history['updatedDate'] = date;
   Order.updateMany({ $or: body.seqs, $nor: [{ static: 'static' }] },
@@ -132,6 +155,7 @@ exports.addManyOfHistory = (req, res) => {
       'statusInfo.color': history.statusInfo.color,
       updatedDate: date,
     }).then((value) => {
+      io.emit('orders')
       res.json(value);
     })
 }

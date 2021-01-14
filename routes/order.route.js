@@ -6,7 +6,7 @@ const ordersController = require("../controllers/orders.controller");
 router.post('/', ordersController.addOrder);
 
 /* GET get all orders && by query  */
-router.get("/", verfication.verifyed, ordersController.getAllOrders);
+router.get("/", verfication.verifyed, ordersController.getOrders);
 
 /* GET get static */
 router.get('/static', verfication.verifyed, ordersController.getStatic);
@@ -22,6 +22,9 @@ router.post('/history/details/:id', verfication.verifyed, ordersController.addSt
 
 /* POST add many of history */
 router.post('/history', verfication.verifyed, ordersController.addManyOfHistory)
+
+/* PATCH update order by id */
+router.patch('/:id', verfication.verifyed, ordersController.updateOrderById)
 
 /* GET get order by id */
 router.get('/:id', verfication.verifyed, ordersController.getOrderById);

@@ -3,7 +3,7 @@ const authController = require("../controllers/auth.controller");
 const verfication = require('../verfication/authorization');
 
 /* POST register */
-router.post("/register", authController.register);
+router.post("/register", verfication.superAdminVerifyed, authController.register);
 
 /* POST login */
 router.post("/login", authController.login);
@@ -21,6 +21,6 @@ router.get('/admin', verfication.verifyed, authController.getAdminInfo)
 router.patch('/admins/role/:id', verfication.superAdminVerifyed, authController.updateRole)
 
 /* DELETE admin */
-router.delete('/admins/:id', verfication.superAdminVerifyed, authController.deleteAdmin)
+router.delete('/admins/:id', authController.deleteAdmin)
 
 module.exports = router;

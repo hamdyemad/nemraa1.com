@@ -16,6 +16,7 @@ exports.getAllCategorys = (req, res) => {
 
 // update category of static
 exports.updateStatic = (req, res) => {
+  let io = req.app.get('io');
   const body = req.body;
   if (body.title == 'update') {
     objUpdate = { $pull: { _categories: body.category } }
@@ -24,12 +25,13 @@ exports.updateStatic = (req, res) => {
   }
   Product.findOneAndUpdate({ static: 'static' }, objUpdate).then((doc) => {
     let removed = 'تم مسحه',
-      success = 'تم اضافته بنجاح !';
+      success = 'تم اضافته بنجاح';
     if (doc && body.title == 'update') {
-      res.json({ message: `${body.category} has been ${removed}` })
+      res.json({ message: `${removed} ${body.category}` })
     } else {
-      res.json({ message: `${body.category} has been ${success}` })
+      res.json({ message: `${success} ${body.category}` })
     }
+    io.emit('categories');
   })
 }
 
@@ -60,25 +62,35 @@ exports.getProductsByOptions = (req, res) => {
 }
 
 // GET get related product by category
-
-exports.getProductsByCategory = (req, res) => {
+exports.getRelatedProducts = (req, res) => {
   Product.find({ category: req.body.category, $nor: [{ _id: req.body.id }] }).then((doc) => {
     const filterdDoc = doc.map(val => {
       return {
         _id: val._id,
         seq: val.seq,
         name: val.name,
-        image: val.image
+        image: val.image,
+        unitPrice: val.unitPrice
       }
     })
     res.json(filterdDoc);
   })
 }
 
-// GET get product by id
+
+// GET get product by name
+
+// GET get product
 exports.getProductById = (req, res) => {
   let productId = req.params.id;
   Product.findById(productId).then((doc) => {
+    res.json(doc);
+  });
+}
+// GET get product by name
+exports.getProductByName = (req, res) => {
+  let productName = req.params.name;
+  Product.findOne({ name: productName }).then((doc) => {
     res.json(doc);
   });
 }
@@ -87,6 +99,7 @@ exports.getProductById = (req, res) => {
 // POST add new Product
 exports.addNewProduct = (req, res) => {
   const body = req.body;
+  let io = req.app.get('io');
   Product.findOne({ name: body.name }).then((doc) => {
     if (doc) {
       res.json({ message: "يوجد منتج بهذاالأسم" });
@@ -134,6 +147,7 @@ exports.addNewProduct = (req, res) => {
           }
           Product.findOneAndUpdate({ static: 'static' }, { $addToSet: { _categories: [body.category] } })
             .then(() => {
+              io.emit('products');
               res.json(doc)
             })
         }).catch(err => {
@@ -152,6 +166,7 @@ exports.addNewProduct = (req, res) => {
 // PATCH update product
 exports.updateProduct = (req, res) => {
   const body = req.body;
+  let io = req.app.get('io');
   let sizes; (body.sizes) ? sizes = body.sizes : sizes = [];
   let otherImages; (body.otherImages) ? otherImages = body.otherImages : otherImages = [];
 
@@ -196,6 +211,7 @@ exports.updateProduct = (req, res) => {
         console.log('otherImages deleted')
       })
     }
+    io.emit('products');
     res.json(doc);
   })
     .catch()
@@ -204,6 +220,7 @@ exports.updateProduct = (req, res) => {
 
 // DELETE delete product by id
 exports.deleteProduct = (req, res) => {
+  let io = req.app.get('io');
   Product.findOne({ _id: req.params.id }).then((doc) => {
     if (doc) {
       deleteImg(doc.image);
@@ -214,6 +231,7 @@ exports.deleteProduct = (req, res) => {
         deleteImg(image);
       }
       Product.deleteOne({ _id: req.params.id }).then((val) => {
+        io.emit('products');
         res.json(val);
       })
     }
@@ -222,20 +240,24 @@ exports.deleteProduct = (req, res) => {
 
 // DELETE delete color & size by id
 exports.deleteColorAndSize = (req, res) => {
+  let io = req.app.get('io');
   Product.findByIdAndUpdate(req.params.id, {
     $pull: { colors: req.body.color, sizes: req.body.size }
   }).then((doc) => {
+    io.emit('products');
     res.json(doc);
   })
 }
 
 // DELETE reviews by id
 exports.deleteReview = (req, res) => {
+  let io = req.app.get('io');
   Product.findById(req.params.id).then(doc => {
     Product.updateOne({ _id: doc._id }, {
       $pull: { reviews: { reviewerName: req.body.reviewerName } }
     }).then(val => {
       deleteImg(req.body.reviewerImage);
+      io.emit('products');
       res.json(val);
     })
   })

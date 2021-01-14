@@ -1,5 +1,12 @@
 const mongoose = require('mongoose');
-const date = new Date();
+let doDate = (number) => {
+    return (+number < 10) ? number = `${0}${number}` : number;
+}
+let date = new Date();
+let month = `${date.getMonth() + 1}`;
+let day = `${date.getDate()}`;
+month = doDate(month);
+day = doDate(day);
 const authSchema = mongoose.Schema({
     firstName: {
         type: String,
@@ -23,7 +30,7 @@ const authSchema = mongoose.Schema({
     },
     addedDate: {
         type: String,
-        default: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+        default: `${date.getFullYear()}-${month}-${day}`
     }
 })
 

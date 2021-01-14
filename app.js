@@ -5,12 +5,19 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const options = { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false }
 const app = express();
+const http = require('http');
+const server = http.createServer(app)
+const io = require('socket.io')(server, {
+    cors: {
+        origin: process.env.clientServer
+    }
+})
 const productRoute = require('./routes/products.route');
 const authRoute = require('./routes/auth.route');
 const orderRoute = require('./routes/order.route');
 const homeRoute = require('./routes/home.route');
 const egyptRoute = require('./routes/egypt.route');
-
+const cartRoute = require('./routes/cart.route');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -21,12 +28,15 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', '*');
     next();
 })
+
+app.set('io', io);
 // routes
 app.use('/products', productRoute);
 app.use(authRoute);
 app.use('/orders', orderRoute);
 app.use(homeRoute)
 app.use('/egypt', egyptRoute)
+app.use('/cart', cartRoute)
 
 
 
@@ -39,4 +49,4 @@ mongoose.connect(process.env.URI, options).then(() => {
     })
 
 
-app.listen(process.env.PORT, console.log(`server listend at ${process.env.PORT}`))
+server.listen(process.env.PORT, console.log(`server listend at ${process.env.PORT}`))
