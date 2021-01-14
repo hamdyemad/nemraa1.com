@@ -9,7 +9,7 @@ router.post('/', (req, res) => {
     if (body.length !== 0) {
         let _ids = body.map((val) => {
             return { _id: val._id }
-        })
+        });
         productModel.find({ $or: _ids }).then((doc) => {
             let carts = [];
             body.forEach((bodyValue) => {
@@ -17,14 +17,16 @@ router.post('/', (req, res) => {
                     if (val._id == bodyValue._id) {
                         carts.push({
                             _id: val._id,
+                            seq: val.seq,
                             name: val.name,
                             facebookPexel: val.facebookPexel,
                             category: val.category,
                             image: val.image,
+                            productInfo: bodyValue.productInfo,
                             unitPrice: val.unitPrice,
-                            amount: +bodyValue.amount,
-                            colors: bodyValue.colors,
-                            sizes: bodyValue.sizes ? val.sizes : []
+                            totalAmount: bodyValue.totalAmount,
+                            totalPrice: val.unitPrice * bodyValue.totalAmount
+
                         })
                     }
                 })
