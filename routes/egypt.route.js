@@ -2,8 +2,9 @@ const router = require('express').Router();
 const egyptController = require('../controllers/egypt.controller');
 const verfication = require('../verfication/authorization');
 
-/* GET get all cities */
-router.get('/cities', verfication.verifyed, egyptController.getCities);
+/* POST get all cities */
+router.get('/cities', egyptController.getCities);
+
 /* POST add new city */
 router.post('/city', verfication.superAdminVerifyed, egyptController.addCity);
 

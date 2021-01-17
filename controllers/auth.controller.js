@@ -22,10 +22,10 @@ exports.register = (req, res) => {
         newAuth.save().then((doc) => {
           if (body.role == 'super-admin') {
             authModel.updateOne({ email: body.email }, { role: 'super-admin' }).then(() => {
-              res.json({ message: `تم اضافة ${body.firstName} ${body.lastName} الى قائمة الأدمنز` });
+              res.json({ message: `الى قائمة الأدمنز ${body.firstName} ${body.lastName} تم اضافة` });
             })
           } else {
-            res.json({ message: `تم اضافة ${body.firstName} ${body.lastName} الى قائمة المشرفين` });
+            res.json({ message: `الى قائمة المشرفين ${body.firstName} ${body.lastName} تم اضافة` });
           }
         })
           .catch(err => res.json(err))

@@ -24,14 +24,14 @@ exports.updateStatic = (req, res) => {
     objUpdate = { $push: { _categories: body.category } }
   }
   Product.findOneAndUpdate({ static: 'static' }, objUpdate).then((doc) => {
-    let removed = 'تم مسحه',
-      success = 'تم اضافته بنجاح';
-    if (doc && body.title == 'update') {
-      res.json({ message: `${removed} ${body.category}` })
-    } else {
-      res.json({ message: `${success} ${body.category}` })
-    }
+    let removed = `بنجاح ${body.category} تم مسح`,
+      success = `بنجاح ${body.category} تم اضافة`;
     io.emit('categories');
+    if (doc && body.title == 'update') {
+      res.json({ message: removed })
+    } else {
+      res.json({ message: success })
+    }
   })
 }
 
@@ -130,7 +130,7 @@ exports.addNewProduct = (req, res) => {
           amount: body.amount,
           discount: body.discount,
           unitPrice: (body.price - body.discount),
-          video: body.video,
+          youtubeVideo: body.youtubeVideo,
           image: req.files.image[0].filename
         });
         newProduct.save().then((doc) => {
@@ -181,7 +181,7 @@ exports.updateProduct = (req, res) => {
     sizes: sizes,
     discount: body.discount,
     unitPrice: (body.price - body.discount),
-    video: body.video,
+    youtubeVideo: body.youtubeVideo,
     image: body.image,
     otherImages: otherImages
   }).then((doc) => {
@@ -211,7 +211,9 @@ exports.updateProduct = (req, res) => {
         console.log('otherImages deleted')
       })
     }
+    io.emit('updateProduct');
     io.emit('products');
+
     res.json(doc);
   })
     .catch()
@@ -244,6 +246,7 @@ exports.deleteColorAndSize = (req, res) => {
   Product.findByIdAndUpdate(req.params.id, {
     $pull: { colors: req.body.color, sizes: req.body.size }
   }).then((doc) => {
+    io.emit('updateProduct');
     io.emit('products');
     res.json(doc);
   })
@@ -257,8 +260,9 @@ exports.deleteReview = (req, res) => {
       $pull: { reviews: { reviewerName: req.body.reviewerName } }
     }).then(val => {
       deleteImg(req.body.reviewerImage);
+      io.emit('updateProduct');
       io.emit('products');
-      res.json(val);
+      res.json({ message: `${req.body.reviewerName} تم مسح` });
     })
   })
 }

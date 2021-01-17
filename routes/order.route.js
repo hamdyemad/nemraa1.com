@@ -11,8 +11,11 @@ router.get("/", verfication.verifyed, ordersController.getOrders);
 /* GET get static */
 router.get('/static', verfication.verifyed, ordersController.getStatic);
 
-/* PATCH update statused of static */
-router.patch('/static', verfication.superAdminVerifyed, ordersController.updateStatuses);
+/* POST update statused of static */
+router.post('/static', verfication.superAdminVerifyed, ordersController.updateStatus);
+
+/* PATCH status by status name */
+router.patch('/static', verfication.superAdminVerifyed, ordersController.removeStatus);
 
 /* GET get orders invoices */
 router.post('/invoices', verfication.verifyed, ordersController.getOrdersByPassTheSeqs);

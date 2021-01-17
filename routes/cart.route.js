@@ -31,6 +31,7 @@ router.post('/', (req, res) => {
                     }
                 })
             })
+            console.log(carts)
             res.json(carts);
         })
     }

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const defaultStatusColor = '#ccd53d';
+const orderStatus = require('./order-status');
 let doDate = (number) => {
     return (+number < 10) ? number = `${0}${number}` : number;
 }
@@ -12,31 +12,36 @@ const orderSchema = mongoose.Schema({
     seq: Number,
     static: String,
     cities: Array,
-    statuses: Array,
+    statuses: [],
     orderPrice: Number,
     shipping: Number,
     orderShippingPrice: Number,
     products: [
         {
-            productId: String,
-            productSeq: Number,
+            _id: String,
+            seq: Number,
             name: String,
             image: String,
             category: String,
+            facebookPexel: String,
             productInfo: [],
             unitPrice: Number,
             totalPrice: Number,
-            totalAmount: Number,
+            totalAmount: Number
         }
     ],
     statusInfo: {
         status: {
             type: String,
-            default: 'معلق'
+            default: orderStatus.status
         },
         color: {
             type: String,
-            default: defaultStatusColor
+            default: orderStatus.statusColor
+        },
+        productStatus: {
+            type: String,
+            default: orderStatus.productStatus
         }
     },
     // client info

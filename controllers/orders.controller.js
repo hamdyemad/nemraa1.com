@@ -1,18 +1,14 @@
 const Order = require('../models/order.model');
 const Product = require('../models/products.model');
+
 /* POST Add new order but before we add the order we increament the sequence value and pass the end value to the newest order */
 exports.addOrder = (req, res) => {
+  const io = req.app.get('io');
   Order.findOneAndUpdate({ static: 'static' }, { $inc: { seq: 1 } }).then((value) => {
     let seq = value.seq;
     const body = req.body;
     const products = body.products;
-    let io = req.app.get('io');
 
-    for (let product of products) {
-      Product.findById(product.productId).then((doc) => {
-        Product.updateOne({ _id: doc._id }, { amount: doc.amount - product.totalAmount }).then()
-      })
-    }
     body['seq'] = seq;
     body['orderPrice'] = products.map((product) => {
       return product.totalPrice
@@ -24,7 +20,7 @@ exports.addOrder = (req, res) => {
       .then((doc) => {
         Order.findOneAndUpdate({ static: 'static' }, { $addToSet: { cities: doc.clientInfo.city } }).then(() => {
           io.emit('orders');
-          res.json({ message: `تم اضافة طلب ${doc.clientInfo.clientName} بنجاح` });
+          res.json({ message: `${doc.clientInfo.clientName} تم انهاء طلبك يا ` });
         });
       })
   })
@@ -33,7 +29,6 @@ exports.addOrder = (req, res) => {
 /* PATCH update order by id */
 exports.updateOrderById = (req, res) => {
   const body = req.body;
-  let io = req.app.get('io');
 
   Order.findById(req.params.id).then((doc) => {
     Order.updateOne({ _id: doc._id }, {
@@ -45,7 +40,6 @@ exports.updateOrderById = (req, res) => {
       shipping: body.shipping,
       products: body.products
     }).then((val) => {
-      io.emit('orders')
       res.json({ message: `تم تعديل ${body.clientInfo.clientName} بنجاح` });
     })
   })
@@ -59,13 +53,17 @@ exports.getOrders = (req, res) => {
     let findObj = { $nor: [{ static: 'static' }] };
     findObj.$and = [];
     Object.keys(query).forEach((q) => {
-      let quertValue = query[q];
+      let queryValue = query[q];
       if (q == 'clientName' || q == 'mobile' || q == 'city') {
-        findObj.$and.push({ [`clientInfo.${[q]}`]: new RegExp(`^${quertValue}`) });
+        findObj.$and.push({ [`clientInfo.${[q]}`]: new RegExp(`^${queryValue}`) });
       } else {
-        findObj.$and.push({ [`${[q]}`]: quertValue });
+        if (q == 'status') {
+          findObj.$and.push({ [`statusInfo.${[q]}`]: queryValue });
+        } else {
+          findObj.$and.push({ [`${[q]}`]: queryValue });
+        }
       }
-    })
+    });
     Order.find(findObj).sort({ seq: -1 })
       .then((doc) => {
         res.json(doc);
@@ -86,12 +84,29 @@ exports.getStatic = (req, res) => {
   })
 }
 
-/* PATCH  update all statuese of static */
-exports.updateStatuses = (req, res) => {
+/* POST  update all statuese of static */
+exports.updateStatus = (req, res) => {
+  let io = req.app.get('io');
   Order.findOneAndUpdate({ static: 'static' }, { $addToSet: { statuses: req.body } }).then((doc) => {
+    io.emit('staticOrders');
     res.json(doc);
   })
 }
+
+/* PATCH remove status bu status name */
+exports.removeStatus = (req, res) => {
+  let io = req.app.get('io');
+  if (req.body.status !== 'معلق') {
+    Order.findOneAndUpdate({ static: 'static' }, { $pull: { statuses: req.body } }).then((doc) => {
+      io.emit('staticOrders');
+      res.json({ message: `تم مسح ${req.body.status} بنجاح` });
+
+    })
+  } else {
+    res.json({ message: 'خطأ' })
+  }
+}
+
 
 /* GET get order by id */
 exports.getOrderById = (req, res) => {
@@ -115,29 +130,44 @@ exports.deleteOrderById = (req, res) => {
 exports.addStatusHistory = (req, res) => {
   const date = new Date();
   const body = req.body;
+  const statusObj = body.statusObj;
   let io = req.app.get('io');
-
   let history = {};
   history.notes = body.notes
   history.updatedDate = date;
   // get static
   Order.findOne({ static: 'static' }).then((doc) => {
     history['statusInfo'] = doc.statuses.find((statObj) => {
-      if (statObj.status == body.status) {
+      if (statObj.status == statusObj.status) {
         return statObj
       }
-    })
-  }).then(() => {
+    });
+    if (history.statusInfo.productStatus == '+') {
+      for (let product of body.products) {
+        Product.findById(product._id).then((productDoc) => {
+          Product.findByIdAndUpdate(productDoc._id, { amount: productDoc.amount + product.totalAmount }).then()
+        })
+      }
+
+    } else if (history.statusInfo.productStatus == '-') {
+      for (let product of body.products) {
+        Product.findById(product._id).then((productDoc) => {
+          Product.findByIdAndUpdate(productDoc._id, { amount: productDoc.amount - product.totalAmount }).then()
+        })
+      }
+    }
+    io.emit('products');
+    io.emit('orders');
     Order.updateOne({ _id: req.params.id },
       {
         $push: { statusHistory: history },
         'statusInfo.status': history.statusInfo.status,
         'statusInfo.color': history.statusInfo.color,
+        'statusInfo.productStatus': history.statusInfo.productStatus,
         updatedDate: date,
         "clientInfo.notes": history.notes
-      }).then((value) => {
-        io.emit('orders')
-        res.json(value);
+      }).then(() => {
+        res.json({ message: `تم تعديل الحالة الى ${history.statusInfo.status}` });
       })
   })
 }
@@ -148,11 +178,29 @@ exports.addManyOfHistory = (req, res) => {
   let io = req.app.get('io');
   let history = { statusInfo: body.statusInfo };
   history['updatedDate'] = date;
+  for (let seq of body.seqs) {
+    Order.findOne({ seq: seq.seq }).then((orderDoc) => {
+      if (history.statusInfo.productStatus == '+') {
+        for (let product of orderDoc.products) {
+          Product.findById(product._id).then((productDoc) => {
+            Product.findByIdAndUpdate(productDoc._id, { amount: productDoc.amount + product.totalAmount }).then()
+          })
+        }
+      } else if (history.statusInfo.productStatus == '-') {
+        for (let product of orderDoc.products) {
+          Product.findById(product._id).then((productDoc) => {
+            Product.findByIdAndUpdate(productDoc._id, { amount: productDoc.amount - product.totalAmount }).then()
+          })
+        }
+      }
+    })
+  }
   Order.updateMany({ $or: body.seqs, $nor: [{ static: 'static' }] },
     {
       $push: { statusHistory: history },
       'statusInfo.status': history.statusInfo.status,
       'statusInfo.color': history.statusInfo.color,
+      'statusInfo.productStatus': history.statusInfo.productStatus,
       updatedDate: date,
     }).then((value) => {
       io.emit('orders')
