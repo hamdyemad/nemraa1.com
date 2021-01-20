@@ -15,44 +15,30 @@ exports.getAllCarousel = (req, res) => {
 }
 
 exports.addNewCarousel = (req, res) => {
-    const carouselImgs = req.files.map(img => img.filename);
-    if (carouselImgs.length > 3) {
-        for (let img of carouselImgs) {
-            deleteImg(img);
-        }
-        res.json({ message: "لا يسمح بأضافة أكثر من 3 صور" })
-    } else {
-        homeModel.findOne({ static: 'static' }).then(doc => {
-            if (doc.carouselImgs.length > 3) {
-                console.log(carouselImgs)
-                for (let img of carouselImgs) {
-                    deleteImg(img);
-                }
-                res.json({ message: "لا يسمح بأضافة أكثر من 3 صور" })
-            }
-            else {
-                homeModel.updateOne({ static: 'static' }, {
-                    $addToSet: {
-                        carouselImgs: carouselImgs
-                    }
-                }).then(doc => {
-                    res.json(doc)
-                })
-            }
-        })
+    const body = req.body;
 
+    for (let i = 0; i < body.homeCarousel.length; i++) {
+        let file = req.files.find(obj => obj.fieldname == `homeCarousel[${i}][carouselImage]`);
+        body.homeCarousel[i].carouselImage = file.filename;
     }
+    homeModel.findOneAndUpdate({}, {
+        $push: { homeCarousel: body.homeCarousel }
+    }).then(() => {
+        res.json({ message: "done" })
+    });
 }
 
 
 exports.removeCarousel = (req, res) => {
-    const carouselImg = req.params.carouselImg;
-    homeModel.findOneAndUpdate({ static: 'static' }, {
-        $pull: {
-            carouselImgs: carouselImg
-        }
-    }).then((doc) => {
-        deleteImg(carouselImg);
-        res.json(doc);
+    const id = req.params.id;
+    homeModel.findOne({ static: 'static' }).then((doc) => {
+        doc.homeCarousel.find((carousel) => {
+            if (carousel._id == id) {
+                deleteImg(carousel.carouselImage);
+                homeModel.findOneAndUpdate({ static: 'static' }, { $pull: { 'homeCarousel': { _id: id } } }).then(() => {
+                    res.json({ message: `بنجاح  تم مسح` })
+                });
+            }
+        })
     })
 }

@@ -10,7 +10,7 @@ let storage = multer.diskStorage({
         cb(null, Date.now() + '-' + files.originalname)
     }
 })
-const upload = multer({ storage }).array('carouselImgs');
+const upload = multer({ storage }).any()
 
 // GET get all carouselimg
 router.get('/carousel', homeController.getAllCarousel)
@@ -18,8 +18,8 @@ router.get('/carousel', homeController.getAllCarousel)
 // POST add new carousel img
 router.post('/carousel', upload, homeController.addNewCarousel);
 
-// DELETE remove carousel img
-router.delete('/carousel/:carouselImg', homeController.removeCarousel)
+// DELETE remove carousel by id
+router.delete('/carousel/:id', homeController.removeCarousel)
 
 
 module.exports = router;

@@ -1,7 +1,21 @@
 const mongoose = require('mongoose');
 const homeSchema = mongoose.Schema({
-    carouselImgs: Array,
-    static: String
+    homeCarousel: [
+        {
+            carouselImage: {
+                type: String,
+                required: true
+            },
+            carouselTitle: {
+                type: String,
+                required: true
+            },
+            carouselHeader: {
+                type: String,
+                required: true
+            }
+        }
+    ]
 });
 
 const homeModel = mongoose.model('home', homeSchema);

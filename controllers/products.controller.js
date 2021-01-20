@@ -18,19 +18,32 @@ exports.getAllCategorys = (req, res) => {
 exports.updateStatic = (req, res) => {
   let io = req.app.get('io');
   const body = req.body;
+  let removed = `بنجاح ${body.category} تم مسح`,
+    success = `بنجاح ${body.category} تم اضافة`;
   if (body.title == 'update') {
     objUpdate = { $pull: { _categories: body.category } }
   } else {
     objUpdate = { $push: { _categories: body.category } }
   }
-  Product.findOneAndUpdate({ static: 'static' }, objUpdate).then((doc) => {
-    let removed = `بنجاح ${body.category} تم مسح`,
-      success = `بنجاح ${body.category} تم اضافة`;
-    io.emit('categories');
-    if (doc && body.title == 'update') {
-      res.json({ message: removed })
+  Product.findOne({ static: 'static' }).then((staticDoc) => {
+    let checkedCategory = false;
+    staticDoc._categories.forEach((category) => {
+      if (body.category == category) {
+        checkedCategory = true;
+      }
+    })
+    if (checkedCategory == true && body.title !== 'update') {
+      res.json({ message: `${body.category} يوجد صنف بهذا الأسم`, error: true })
     } else {
-      res.json({ message: success })
+      Product.findOneAndUpdate({ static: 'static' }, objUpdate).then((doc) => {
+        io.emit('categories');
+        if (doc && body.title == 'update') {
+          res.json({ message: removed, error: false })
+        } else {
+          res.json({ message: success, error: false })
+        }
+      })
+
     }
   })
 }
@@ -70,7 +83,8 @@ exports.getRelatedProducts = (req, res) => {
         seq: val.seq,
         name: val.name,
         image: val.image,
-        unitPrice: val.unitPrice
+        unitPrice: val.unitPrice,
+        category: val.category
       }
     })
     res.json(filterdDoc);
