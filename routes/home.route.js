@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const homeController = require('../controllers/home.controller');
+const verfication = require('../verfication/authorization')
 const multer = require('multer');
 // Multer
 let storage = multer.diskStorage({
@@ -16,10 +17,10 @@ const upload = multer({ storage }).any()
 router.get('/carousel', homeController.getAllCarousel)
 
 // POST add new carousel img
-router.post('/carousel', upload, homeController.addNewCarousel);
+router.post('/carousel', verfication.superAdminVerifyed, upload, homeController.addNewCarousel);
 
 // DELETE remove carousel by id
-router.delete('/carousel/:id', homeController.removeCarousel)
+router.delete('/carousel/:id', verfication.superAdminVerifyed, homeController.removeCarousel)
 
 
 module.exports = router;

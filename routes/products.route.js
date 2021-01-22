@@ -25,12 +25,12 @@ router.get('/', productsController.getProductsByOptions);
 router.post('/related', productsController.getRelatedProducts)
 
 // POST add new product
-router.post('/', upload, productsController.addNewProduct);
+router.post('/', verfication.superAdminVerifyed, upload, productsController.addNewProduct);
 
 // GET get static
 router.get('/static', productsController.getAllCategorys);
 // PATCH update static
-router.patch('/static', productsController.updateStatic);
+router.patch('/static', verfication.superAdminVerifyed, productsController.updateStatic);
 
 
 // DELETE delete product color

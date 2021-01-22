@@ -14,7 +14,8 @@ const informationSchema = mongoose.Schema({
     logo: String,
     email: String,
     companyName: String,
-    aboutCompany: String
+    aboutCompany: String,
+    qrCode: String
 });
 
 const Information = mongoose.model('information', informationSchema);
