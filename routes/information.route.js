@@ -5,13 +5,13 @@ const fs = require('fs');
 const verfication = require('../verfication/authorization');
 
 let removeLogo = (logo) => {
-  fs.unlinkSync(`images/information/${logo}`);
+  fs.unlinkSync(`images/info-images/${logo}`);
 }
 
 // Multer
 let storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'images/information')
+    cb(null, 'images/info-images')
   },
   filename: (req, files, cb) => {
     cb(null, Date.now() + '-' + files.originalname)
@@ -21,7 +21,7 @@ const upload = multer({ storage }).single('logo');
 
 
 // patch information by id
-router.patch('/information/:id', verfication.superAdminVerifyed, upload, (req, res) => {
+router.patch('/info/:id', verfication.superAdminVerifyed, upload, (req, res) => {
   let io = req.app.get('io');
   let id = req.params.id;
   const body = req.body;
@@ -49,7 +49,7 @@ router.patch('/information/:id', verfication.superAdminVerifyed, upload, (req, r
 
 
 // get information by id
-router.get('/information', verfication.verifyed, (req, res) => {
+router.get('/info', verfication.verifyed, (req, res) => {
   informationModel.find({}).then((doc) => {
     res.json(doc);
   })

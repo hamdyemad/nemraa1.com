@@ -151,19 +151,21 @@ exports.addStatusHistory = (req, res) => {
     if (history.statusInfo.productStatus == '+') {
       for (let product of body.products) {
         Product.findById(product._id).then((productDoc) => {
-          Product.findByIdAndUpdate(productDoc._id, { amount: productDoc.amount + product.totalAmount }).then()
+          if (productDoc.amount !== 0) {
+            Product.findByIdAndUpdate(productDoc._id, { $inc: { amount: product.totalAmount } }).then()
+          }
         })
       }
 
     } else if (history.statusInfo.productStatus == '-') {
       for (let product of body.products) {
         Product.findById(product._id).then((productDoc) => {
-          Product.findByIdAndUpdate(productDoc._id, { amount: productDoc.amount - product.totalAmount }).then()
+          if (productDoc.amount !== 0) {
+            Product.findByIdAndUpdate(productDoc._id, { $inc: { amount: -product.totalAmount } }).then()
+          }
         })
       }
     }
-    io.emit('products');
-    io.emit('orders');
     Order.updateOne({ _id: req.params.id },
       {
         $push: { statusHistory: history },
@@ -173,6 +175,8 @@ exports.addStatusHistory = (req, res) => {
         updatedDate: date,
         "clientInfo.notes": history.notes
       }).then(() => {
+        io.emit('products');
+        io.emit('orders');
         res.json({ message: `تم تعديل الحالة الى ${history.statusInfo.status}` });
       })
   })
@@ -188,19 +192,20 @@ exports.addManyOfHistory = (req, res) => {
     Order.findOne({ seq: seq.seq }).then((orderDoc) => {
       if (orderDoc) {
         if (history.statusInfo.productStatus == '+') {
-          let totalAmount;
           for (let product of orderDoc.products) {
             Product.findById(product._id).then((productDoc) => {
-              totalAmount = product.totalAmount;
-              console.log(totalAmount)
-              Product.findByIdAndUpdate(productDoc._id, { $inc: { amount: product.totalAmount } }).then()
+              if (productDoc.amount !== 0) {
+                Product.findByIdAndUpdate(productDoc._id, { $inc: { amount: product.totalAmount } }).then()
+              }
             })
           }
         }
         else if (history.statusInfo.productStatus == '-') {
           for (let product of orderDoc.products) {
             Product.findById(product._id).then((productDoc) => {
-              Product.findByIdAndUpdate(productDoc._id, { $inc: { amount: -product.totalAmount } }).then()
+              if (productDoc.amount !== 0) {
+                Product.findByIdAndUpdate(productDoc._id, { $inc: { amount: -product.totalAmount } }).then()
+              }
             })
           }
         }
