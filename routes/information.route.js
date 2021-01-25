@@ -21,36 +21,66 @@ const upload = multer({ storage }).single('logo');
 
 
 // patch information by id
-router.patch('/info/:id', verfication.superAdminVerifyed, upload, (req, res) => {
+router.post('/info', verfication.superAdminVerifyed, upload, (req, res) => {
   let io = req.app.get('io');
-  let id = req.params.id;
   const body = req.body;
-  informationModel.findByIdAndUpdate(id, {
-    'socials.facebook': body.socials.facebook,
-    'socials.instagram': body.socials.instagram,
-    'socials.telegram': body.socials.telegram,
-    'socials.watsappNumber': body.socials.watsappNumber,
-    'location.address': body.location.address,
-    'location.city': body.location.city,
-    'location.country': body.location.country,
-    companyName: body.companyName,
-    aboutCompany: body.aboutCompany,
-    email: body.email,
-    qrCode: body.qrCode
-  }).then((doc) => {
-    if (req.file) {
-      removeLogo(doc.logo);
-      informationModel.findByIdAndUpdate(doc._id, { logo: req.file.filename }).then();
+  informationModel.findOne({}).then((doc) => {
+    if (doc) {
+      informationModel.updateOne({ _id: doc._id }, {
+        'socials.facebook': body.socials.facebook,
+        'socials.instagram': body.socials.instagram,
+        'socials.youtube': body.socials.youtube,
+        'socials.watsappNumber': body.socials.watsappNumber,
+        'location.city': body.location.city,
+        'location.country': body.location.country,
+        companyName: body.companyName,
+        aboutCompany: body.aboutCompany,
+        email: body.email,
+        mobile: body.mobile,
+        qrCode: body.qrCode,
+        logo: body.logo
+      }).then(() => {
+        if (req.file) {
+          let file = req.file.filename;
+          if (doc.logo) {
+            removeLogo(doc.logo);
+          }
+          informationModel.updateOne({ _id: doc._id }, { logo: file }).then();
+        }
+        io.emit('information');
+        res.json({ message: 'تم التعديل بنجاح' })
+      })
+    } else {
+      let newInformationModel = new informationModel({
+        'socials.facebook': body.socials.facebook,
+        'socials.instagram': body.socials.instagram,
+        'socials.youtube': body.socials.youtube,
+        'socials.watsappNumber': body.socials.watsappNumber,
+        'location.city': body.location.city,
+        'location.country': body.location.country,
+        companyName: body.companyName,
+        aboutCompany: body.aboutCompany,
+        email: body.email,
+        mobile: body.mobile,
+        qrCode: body.qrCode,
+        logo: body.logo
+      });
+      newInformationModel.save().then((doc) => {
+        if (req.file) {
+          let file = req.file.filename;
+          informationModel.updateOne({ _id: doc._id }, { logo: file }).then();
+        }
+        io.emit('information');
+        res.json({ message: 'تم التعديل بنجاح' })
+      })
     }
-    io.emit('information');
-    res.json({ message: 'تم التعديل بنجاح' })
   })
 })
 
 
 // get information by id
-router.get('/info', verfication.verifyed, (req, res) => {
-  informationModel.find({}).then((doc) => {
+router.get('/info', (req, res) => {
+  informationModel.findOne({}).then((doc) => {
     res.json(doc);
   })
 })

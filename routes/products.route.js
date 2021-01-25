@@ -44,9 +44,13 @@ router.patch('/:id', verfication.superAdminVerifyed, upload, productsController.
 
 // GET get product by id
 router.get('/:id', productsController.getProductById)
-
 // GET get product by name
 router.get('/product/:name', productsController.getProductByName)
+
+// GET get products by name
+router.get('/search/:name', productsController.getSuggestProducts)
+
+
 
 // DELETE delete product by id
 router.delete('/:id', verfication.superAdminVerifyed, productsController.deleteProduct)

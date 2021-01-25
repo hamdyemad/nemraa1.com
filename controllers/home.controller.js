@@ -9,7 +9,7 @@ function deleteImg(img) {
 }
 
 exports.getAllCarousel = (req, res) => {
-    homeModel.findOne({ static: 'static' }).then(doc => {
+    homeModel.findOne().then(doc => {
         res.json(doc);
     })
 }
@@ -21,23 +21,35 @@ exports.addNewCarousel = (req, res) => {
         let file = req.files.find(obj => obj.fieldname == `homeCarousel[${i}][carouselImage]`);
         body.homeCarousel[i].carouselImage = file.filename;
     }
-    homeModel.findOneAndUpdate({}, {
-        $push: { homeCarousel: body.homeCarousel }
-    }).then(() => {
-        io.emit('homeCarousel')
-        res.json({ message: `تمت الأضافة بنجاح` })
-    });
+    homeModel.findOne({}).then((doc) => {
+        if (doc) {
+            homeModel.findOneAndUpdate({ _id: doc._id }, {
+                $push: { homeCarousel: body.homeCarousel }
+            }).then(() => {
+                io.emit('homeCarousel')
+                res.json({ message: `تمت الأضافة بنجاح` })
+            });
+        } else {
+            let newhomeModel = new homeModel({
+                homeCarousel: body.homeCarousel
+            })
+            newhomeModel.save().then(() => {
+                io.emit('homeCarousel')
+                res.json({ message: `تمت الأضافة بنجاح` })
+            })
+        }
+    })
 }
 
 
 exports.removeCarousel = (req, res) => {
     const id = req.params.id;
     let io = req.app.get('io');
-    homeModel.findOne({ static: 'static' }).then((doc) => {
+    homeModel.findOne({}).then((doc) => {
         doc.homeCarousel.find((carousel) => {
             if (carousel._id == id) {
                 deleteImg(carousel.carouselImage);
-                homeModel.findOneAndUpdate({ static: 'static' }, { $pull: { 'homeCarousel': { _id: id } } }).then(() => {
+                homeModel.findOneAndUpdate({ _id: doc._id }, { $pull: { 'homeCarousel': { _id: id } } }).then(() => {
                     io.emit('homeCarousel')
                     res.json({ message: `${carousel.carouselHeader} تم مسح` })
                 });

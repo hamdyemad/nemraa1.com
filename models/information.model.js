@@ -3,16 +3,16 @@ const informationSchema = mongoose.Schema({
     socials: {
         facebook: String,
         instagram: String,
-        telegram: String,
+        youtube: String,
         watsappNumber: String
     },
     location: {
-        address: String,
         city: String,
         country: String
     },
     logo: String,
     email: String,
+    mobile: String,
     companyName: String,
     aboutCompany: String,
     qrCode: String

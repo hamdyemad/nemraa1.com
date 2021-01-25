@@ -4,7 +4,7 @@ const homeSchema = mongoose.Schema({
         {
             carouselImage: {
                 type: String,
-                required: true
+                required: true,
             },
             carouselTitle: {
                 type: String,

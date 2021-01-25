@@ -92,9 +92,7 @@ exports.getRelatedProducts = (req, res) => {
 }
 
 
-// GET get product by name
-
-// GET get product
+// GET get product by id
 exports.getProductById = (req, res) => {
   let productId = req.params.id;
   Product.findById(productId).then((doc) => {
@@ -103,10 +101,26 @@ exports.getProductById = (req, res) => {
 }
 // GET get product by name
 exports.getProductByName = (req, res) => {
-  let productName = req.params.name;
-  Product.findOne({ name: productName }).then((doc) => {
+  let name = req.params.name;
+  Product.findOne({ name: name }).then((doc) => {
     res.json(doc);
   });
+}
+
+exports.getSuggestProducts = (req, res) => {
+  let name = req.params.name;
+  Product.find({ $nor: [{ static: 'static' }], name: new RegExp([`^${name}`]) }).then((doc) => {
+    if (doc.length !== 0) {
+      let filteredProducts = doc.map((obj) => {
+        return {
+          _id: obj._id,
+          image: obj.image,
+          name: obj.name
+        }
+      })
+      res.json(filteredProducts);
+    }
+  })
 }
 
 
