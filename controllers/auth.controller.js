@@ -52,16 +52,12 @@ exports.login = (req, res) => {
           } else {
             switch (doc.role) {
               case 'admin': {
-                let token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.adminSecretKey, {
-                  expiresIn: '7h',
-                });
+                let token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.adminSecretKey);
                 res.json({ access_token: token, role: doc.role });
               }
                 break
               case 'super-admin': {
-                let token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.superAdminSecretKey, {
-                  expiresIn: '7h',
-                });
+                let token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.superAdminSecretKey);
                 res.json({ access_token: token, role: doc.role });
               }
                 break

@@ -128,6 +128,9 @@ exports.getSuggestProducts = (req, res) => {
 exports.addNewProduct = (req, res) => {
   const body = req.body;
   let io = req.app.get('io');
+  if (body.discount == 'null' || body.discount == '') {
+    body.discount = 0;
+  }
   Product.findOne({ name: body.name }).then((doc) => {
     if (doc) {
       res.json({ message: "يوجد منتج بهذاالأسم" });
@@ -197,6 +200,10 @@ exports.updateProduct = (req, res) => {
   let io = req.app.get('io');
   let sizes; (body.sizes) ? sizes = body.sizes : sizes = [];
   let otherImages; (body.otherImages) ? otherImages = body.otherImages : otherImages = [];
+  if (body.discount == 'null' || body.discount == '') {
+    body.discount = 0;
+  }
+  console.log(body.discount)
 
   Product.findByIdAndUpdate(req.params.id, {
     name: body.name,
