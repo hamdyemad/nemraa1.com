@@ -19,12 +19,17 @@ exports.register = (req, res) => {
           email: body.email,
           password: hashedPassword
         })
-        newAuth.save().then((doc) => {
+        newAuth.save().then(() => {
           if (body.role == 'super-admin') {
             authModel.updateOne({ email: body.email }, { role: 'super-admin' }).then(() => {
               res.json({ message: `الى قائمة الأدمنز ${body.firstName} ${body.lastName} تم اضافة` });
             })
-          } else {
+          } else if (body.role == 'sub-admin') {
+            authModel.updateOne({ email: body.email }, { role: 'sub-admin' }).then(() => {
+              res.json({ message: `الى قائمة الأدمنز ${body.firstName} ${body.lastName} تم اضافة` });
+            })
+          }
+          else {
             res.json({ message: `الى قائمة المشرفين ${body.firstName} ${body.lastName} تم اضافة` });
           }
         })
@@ -61,6 +66,10 @@ exports.login = (req, res) => {
                 res.json({ access_token: token, role: doc.role });
               }
                 break
+              case 'sub-admin': {
+                let token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.subAdminSecretKey);
+                res.json({ access_token: token, role: doc.role });
+              }
             }
           }
         })

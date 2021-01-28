@@ -21,6 +21,6 @@ router.get('/admin', verfication.verifyed, authController.getAdminInfo)
 router.patch('/admins/role/:id', verfication.superAdminVerifyed, authController.updateRole)
 
 /* DELETE admin */
-router.delete('/admins/:id', authController.deleteAdmin)
+router.delete('/admins/:id', verfication.superAdminVerifyed, authController.deleteAdmin)
 
 module.exports = router;

@@ -7,7 +7,7 @@ router.get('/cities', egyptController.getCities);
 
 
 // PATCH update free shpping status of cities
-router.patch('/cities', egyptController.updateShipping)
+router.patch('/cities', verfication.superAdminVerifyed, egyptController.updateShipping)
 
 /* POST add new city */
 router.post('/city', verfication.superAdminVerifyed, egyptController.addCity);

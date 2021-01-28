@@ -18,16 +18,16 @@ router.post('/static', verfication.superAdminVerifyed, ordersController.updateSt
 router.patch('/static', verfication.superAdminVerifyed, ordersController.removeStatus);
 
 /* GET get orders invoices */
-router.post('/invoices', verfication.verifyed, ordersController.getOrdersByPassTheSeqs);
+router.post('/invoices', verfication.superAndAdminVerifed, ordersController.getOrdersByPassTheSeqs);
 
 /* POST add status histroy */
 router.post('/history/details/:id', verfication.verifyed, ordersController.addStatusHistory);
 
 /* POST add many of history */
-router.post('/history', verfication.verifyed, ordersController.addManyOfHistory)
+router.post('/history', verfication.superAndAdminVerifed, ordersController.addManyOfHistory)
 
 /* PATCH update order by id */
-router.patch('/:id', verfication.verifyed, ordersController.updateOrderById)
+router.patch('/:id', verfication.superAndAdminVerifed, ordersController.updateOrderById)
 
 /* GET get order by id */
 router.get('/:id', verfication.verifyed, ordersController.getOrderById);
