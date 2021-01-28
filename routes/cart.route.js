@@ -4,7 +4,6 @@ const productModel = require('../models/products.model');
 
 // get all carts
 router.post('/', (req, res) => {
-
     let body = req.body;
     if (body.length !== 0) {
         let _ids = body.map((val) => {
@@ -31,7 +30,6 @@ router.post('/', (req, res) => {
                     }
                 })
             })
-            console.log(carts)
             res.json(carts);
         })
     }
