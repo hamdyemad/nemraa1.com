@@ -15,7 +15,8 @@ const orderSchema = mongoose.Schema({
     statuses: [],
     orderPrice: Number,
     shipping: Number,
-    orderShippingPrice: Number,
+    orderFinallyPrice: Number,
+    orderDiscount: Number,
     products: [
         {
             _id: String,

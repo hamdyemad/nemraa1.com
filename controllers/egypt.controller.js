@@ -1,8 +1,29 @@
 const egyptModel = require('../models/egypt.model');
 
 
-// update city
+//updateShipping
 
+exports.updateShipping = (req, res) => {
+  let status = req.body.status;
+  let io = req.app.get('io');
+
+  egyptModel.find({}).then((doc) => {
+    for (let city of doc) {
+      egyptModel.findByIdAndUpdate(city._id, { freeShipping: status }).then()
+    }
+  }).then(() => {
+    io.emit('cities');
+
+    if (status == true) {
+      res.json({ message: 'تم تفعيل الشحن المجانى' })
+    } else {
+      res.json({ message: 'تم الغاء الشحن المجانى' })
+    }
+  })
+}
+
+
+// update city
 exports.updateCity = (req, res) => {
   let io = req.app.get('io');
   const body = req.body;

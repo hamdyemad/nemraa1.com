@@ -41,6 +41,10 @@ const ProductSchema = mongoose.Schema({
     addedDate: {
         type: String,
         default: `${date.getFullYear()}-${month}-${day}`
+    },
+    DateAdded: {
+        type: Date,
+        default: new Date()
     }
 });
 

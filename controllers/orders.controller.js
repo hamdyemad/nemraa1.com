@@ -10,10 +10,14 @@ exports.addOrder = (req, res) => {
     const products = body.products;
 
     body['seq'] = seq;
+    if (!body.orderDiscount) {
+      body['orderDiscount'] = 0;
+    }
+    body['orderDiscount'] = body.orderDiscount;
     body['orderPrice'] = products.map((product) => {
       return product.totalPrice
     }).reduce((acc, current) => acc + current);
-    body['orderShippingPrice'] = body['orderPrice'] + body.shipping;
+    body['orderFinallyPrice'] = (body['orderPrice'] + body.shipping) - body.orderDiscount;
     let newOrder = new Order(body);
     newOrder
       .save()
@@ -30,6 +34,7 @@ exports.addOrder = (req, res) => {
 exports.updateOrderById = (req, res) => {
   const body = req.body;
   const io = req.app.get('io');
+  body['orderDiscount'] = body.orderDiscount;
   body['orderPrice'] = body.products.map((product) => {
     return product.totalPrice
   }).reduce((acc, current) => acc + current);
@@ -41,7 +46,8 @@ exports.updateOrderById = (req, res) => {
       'clientInfo.address': body.clientInfo.address,
       'clientInfo.notes': body.clientInfo.notes,
       orderPrice: body['orderPrice'],
-      orderShippingPrice: body['orderPrice'] + body.shipping,
+      orderDiscount: body.orderDiscount,
+      orderFinallyPrice: (body['orderPrice'] + body.shipping) - body.orderDiscount,
       shipping: body.shipping,
       products: body.products
     }).then((val) => {
