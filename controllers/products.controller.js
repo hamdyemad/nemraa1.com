@@ -133,7 +133,7 @@ exports.addNewProduct = (req, res) => {
   }
   Product.findOne({ name: body.name }).then((doc) => {
     if (doc) {
-      res.json({ message: "يوجد منتج بهذاالأسم" });
+      res.json({ message: "يوجد منتج بهذا الأسم" });
       deleteImg(req.files.image[0].filename);
       if (req.files.reviews) {
         const reviewsImages = req.files.reviews.map(x => x.filename);

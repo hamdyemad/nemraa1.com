@@ -19,6 +19,7 @@ const homeRoute = require('./routes/home.route');
 const egyptRoute = require('./routes/egypt.route');
 const cartRoute = require('./routes/cart.route');
 const informatiomRoute = require('./routes/information.route');
+const advertisingRoute = require('./routes/advertising.route');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -39,6 +40,7 @@ app.use('/orders', orderRoute);
 app.use(homeRoute)
 app.use('/egypt', egyptRoute)
 app.use('/cart', cartRoute)
+app.use('/advertising', advertisingRoute)
 
 
 

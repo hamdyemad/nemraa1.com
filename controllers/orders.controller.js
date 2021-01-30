@@ -226,7 +226,8 @@ exports.addManyOfHistory = (req, res) => {
       'statusInfo.productStatus': history.statusInfo.productStatus,
       updatedDate: date,
     }).then((value) => {
-      io.emit('orders')
+      io.emit('products');
+      io.emit('orders');
       res.json(value);
     })
 }
