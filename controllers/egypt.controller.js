@@ -28,7 +28,7 @@ exports.updateCity = (req, res) => {
   let io = req.app.get('io');
   const body = req.body;
   body.city = body.city.toLowerCase();
-  egyptModel.findByIdAndUpdate(req.params.id, { city: body.city, price: body.price }).then(() => {
+  egyptModel.findByIdAndUpdate(req.params.id, { city: body.city, price: body.price, shippingTime: body.shippingTime }).then(() => {
     io.emit('cities');
     res.json({ message: `${body.city} تم تعديل` });
   })
@@ -45,7 +45,8 @@ exports.addCity = (req, res) => {
     } else {
       let newCity = new egyptModel({
         city: body.city,
-        price: body.price
+        price: body.price,
+        shippingTime: body.shippingTime
       });
       newCity.save().then(() => {
         io.emit('cities');

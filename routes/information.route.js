@@ -21,7 +21,7 @@ const upload = multer({ storage }).single('logo');
 
 
 // patch information by id
-router.post('/info', verfication.superAdminVerifyed, upload, (req, res) => {
+router.post('/info', upload, (req, res) => {
   let io = req.app.get('io');
   const body = req.body;
   informationModel.findOne({}).then((doc) => {

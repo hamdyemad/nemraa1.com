@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const egyptSchema = mongoose.Schema({
   city: String,
   price: Number,
+  shippingTime: String,
   freeShipping: {
     type: Boolean,
     default: false
