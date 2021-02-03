@@ -11,7 +11,18 @@ day = doDate(day);
 const ProductSchema = mongoose.Schema({
     seq: Number,
     static: String,
-    _categories: Array,
+    _categories: [
+        {
+            categoryImage: {
+                required: true,
+                type: String
+            },
+            category: {
+                required: true,
+                type: String
+            }
+        }
+    ],
     category: String,
     name: String,
     description: String,

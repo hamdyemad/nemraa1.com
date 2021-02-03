@@ -11,8 +11,8 @@ router.post("/login", authController.login);
 /* GET get all admins */
 router.get('/admins', verfication.superAdminVerifyed, authController.getAllAdmins);
 
-/* GET get specific admins */
-router.post('/admins/specific', verfication.superAdminVerifyed, authController.getSpecificAdmins)
+/* GET get all sub-admins */
+router.get('/subAdmins', verfication.verifyed, authController.getSubAdmins);
 
 /* GET get admin info */
 router.get('/admin', verfication.verifyed, authController.getAdminInfo)

@@ -17,6 +17,7 @@ const orderSchema = mongoose.Schema({
     shipping: Number,
     orderFinallyPrice: Number,
     orderDiscount: Number,
+    adminVerfied: [],
     products: [
         {
             _id: String,
@@ -44,6 +45,10 @@ const orderSchema = mongoose.Schema({
             type: String,
             default: orderStatus.productStatus
         }
+    },
+    orderIncome: {
+        type: String,
+        default: 'website'
     },
     // client info
     clientInfo: {

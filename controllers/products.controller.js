@@ -16,36 +16,52 @@ exports.getAllCategorys = (req, res) => {
 
 // update category of static
 exports.updateStatic = (req, res) => {
-  let io = req.app.get('io');
   const body = req.body;
-  let removed = `بنجاح ${body.category} تم مسح`,
-    success = `بنجاح ${body.category} تم اضافة`;
-  if (body.title == 'update') {
-    objUpdate = { $pull: { _categories: body.category } }
-  } else {
-    objUpdate = { $push: { _categories: body.category } }
+  let file;
+  if (req.files) {
+    file = req.files.categoryImage[0];
+    body['categoryImage'] = file.filename;
   }
-  Product.findOne({ static: 'static' }).then((staticDoc) => {
-    let checkedCategory = false;
-    staticDoc._categories.forEach((category) => {
-      if (body.category == category) {
-        checkedCategory = true;
-      }
-    })
-    if (checkedCategory == true && body.title !== 'update') {
-      res.json({ message: `${body.category} يوجد صنف بهذا الأسم`, error: true })
-    } else {
-      Product.findOneAndUpdate({ static: 'static' }, objUpdate).then((doc) => {
-        io.emit('categories');
-        if (doc && body.title == 'update') {
-          res.json({ message: removed, error: false })
+  const io = req.app.get('io');
+  let updatedObj = {};
+  if (body.title) {
+    if (body.title == 'add') {
+      updatedObj['$push'] = { _categories: body }
+      Product.findOne({ static: 'static' }).then((doc) => {
+        let catObj = doc._categories.find((catObj) => catObj.category == body.category);
+        if (catObj) {
+          if (file) {
+            deleteImg(file.filename);
+          }
+          res.json({ message: "هذا الصنف موجود بالفعل" })
         } else {
-          res.json({ message: success, error: false })
+          Product.findOneAndUpdate({ static: 'static' }, updatedObj).then(() => {
+            io.emit('categories')
+            res.json({ message: `بنجاح ${body.category} تم أضافة` });
+          })
+
         }
       })
-
+    } else {
+      Product.findOne({ static: 'static' }).then((doc) => {
+        let catObj = doc._categories.find((catObj) => catObj.category == body.category);
+        if (catObj) {
+          deleteImg(catObj.categoryImage);
+          Product.findOneAndUpdate({ static: 'static' }, { $pull: { _categories: { category: body.category } } }).then(() => {
+            io.emit('categories')
+            res.json({ message: `${body.category} تم ازالة` });
+          })
+        } else {
+          if (file) {
+            deleteImg(file.filename);
+          }
+          res.json({ message: "يوجد خطأ ما" })
+        }
+      })
     }
-  })
+
+  }
+
 }
 
 
@@ -176,11 +192,8 @@ exports.addNewProduct = (req, res) => {
               { $push: { reviews: body.reviews } }).then()
 
           }
-          Product.findOneAndUpdate({ static: 'static' }, { $addToSet: { _categories: [body.category] } })
-            .then(() => {
-              io.emit('products');
-              res.json(doc)
-            })
+          io.emit('products');
+          res.json(doc)
         }).catch(err => {
           console.log(err)
         })
@@ -203,7 +216,6 @@ exports.updateProduct = (req, res) => {
   if (body.discount == 'null' || body.discount == '') {
     body.discount = 0;
   }
-  console.log(body.discount)
 
   Product.findByIdAndUpdate(req.params.id, {
     name: body.name,

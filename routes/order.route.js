@@ -8,6 +8,16 @@ router.post('/', ordersController.addOrder);
 /* GET get all orders && by query  */
 router.get("/", verfication.verifyed, ordersController.getOrders);
 
+/* GET get complted orders */
+router.get('/completed', verfication.verifyed, ordersController.getAllCompletedOrders);
+
+
+/* POST post add orders to admins view */
+router.post("/addToAdminView", verfication.superAndAdminVerifed, ordersController.addOrderShowWithAdmin)
+
+/* PATCH update orders to admins view */
+router.patch('/addToAdminView', verfication.superAndAdminVerifed, ordersController.removeOrderShowWithAdmin)
+
 /* GET get static */
 router.get('/static', verfication.verifyed, ordersController.getStatic);
 
@@ -18,7 +28,7 @@ router.post('/static', verfication.superAdminVerifyed, ordersController.updateSt
 router.patch('/static', verfication.superAdminVerifyed, ordersController.removeStatus);
 
 /* GET get orders invoices */
-router.post('/invoices', verfication.superAndAdminVerifed, ordersController.getOrdersByPassTheSeqs);
+router.post('/invoices', verfication.verifyed, ordersController.getOrdersByPassTheSeqs);
 
 /* POST add status histroy */
 router.post('/history/details/:id', verfication.verifyed, ordersController.addStatusHistory);

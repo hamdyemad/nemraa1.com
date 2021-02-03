@@ -7,6 +7,7 @@ const authModel = require('../models/auth.model');
 // POST register
 exports.register = (req, res) => {
   const body = req.body;
+  const io = req.app.get('io');
   body.email = body.email.toLowerCase();
   body.password = body.password.toLowerCase();
   authModel.findOne({ email: body.email }).then((doc) => {
@@ -20,6 +21,7 @@ exports.register = (req, res) => {
           password: hashedPassword
         })
         newAuth.save().then(() => {
+          io.emit('admins');
           if (body.role == 'super-admin') {
             authModel.updateOne({ email: body.email }, { role: 'super-admin' }).then(() => {
               res.json({ message: `الى قائمة الأدمنز ${body.firstName} ${body.lastName} تم اضافة` });
@@ -88,18 +90,12 @@ exports.getAllAdmins = (req, res) => {
     res.json(doc);
   })
 }
-// get specific admins with ids
-exports.getSpecificAdmins = (req, res) => {
-  if (Object.keys(req.body).length !== 0) {
-    const ids = req.body;
-    const idsArr = [];
-    for (let id of ids) {
-      idsArr.push({ _id: id })
-    }
-    authModel.find({ $or: idsArr }).then(doc => {
-      res.json(doc);
-    })
-  }
+
+// get sub-admins
+exports.getSubAdmins = (req, res) => {
+  authModel.find({ role: 'sub-admin' }).then((doc) => {
+    res.json(doc);
+  })
 }
 
 // get admin info
@@ -111,16 +107,20 @@ exports.getAdminInfo = (req, res) => {
 
 // PATCH update role
 exports.updateRole = (req, res) => {
+  const io = req.app.get('io');
   authModel.findByIdAndUpdate(req.params.id, {
     role: req.body.role
   }).then((doc) => {
+    io.emit('admins')
     res.json(doc);
   })
 }
 
 // DELETE admin
 exports.deleteAdmin = (req, res) => {
+  const io = req.app.get('io');
   authModel.findOneAndDelete({ _id: req.params.id }).then((doc) => {
+    io.emit('admins')
     res.json(doc);
   })
 }

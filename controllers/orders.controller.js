@@ -1,5 +1,7 @@
 const Order = require('../models/order.model');
 const Product = require('../models/products.model');
+const Auth = require('../models/auth.model');
+const { find } = require('../models/order.model');
 
 /* POST Add new order but before we add the order we increament the sequence value and pass the end value to the newest order */
 exports.addOrder = (req, res) => {
@@ -49,7 +51,8 @@ exports.updateOrderById = (req, res) => {
       orderDiscount: body.orderDiscount,
       orderFinallyPrice: (body['orderPrice'] + body.shipping) - body.orderDiscount,
       shipping: body.shipping,
-      products: body.products
+      products: body.products,
+      orderIncome: body.orderIncome
     }).then((val) => {
       io.emit('orders');
       res.json({ message: `بنجاح ${body.clientInfo.clientName} تم تعديل` });
@@ -76,17 +79,73 @@ exports.getOrders = (req, res) => {
         }
       }
     });
-    Order.find(findObj).sort({ seq: -1 })
-      .then((doc) => {
-        res.json(doc);
-      })
+    if (req.role == 'super-admin' || req.role == 'admin') {
+      Order.find(findObj).sort({ seq: -1 })
+        .then((value) => {
+          res.json(value);
+        })
+    } else {
+      findObj['adminVerfied.adminId'] = req.adminId
+      Order.find(findObj).sort({ seq: -1 })
+        .then((value) => {
+          res.json(value);
+        })
+    }
   } else {
-    Order.find({ $nor: [{ static: 'static' }] }).sort({ seq: -1 })
-      .then((value) => {
-        res.json(value);
-      })
+    if (req.role == 'super-admin' || req.role == 'admin') {
+      Order.find({ $nor: [{ static: 'static' }] }).sort({ seq: -1 })
+        .then((value) => {
+          res.json(value);
+        })
+    } else {
+      Order.find({ 'adminVerfied.adminId': req.adminId }).sort({ seq: -1 })
+        .then((value) => {
+          res.json(value);
+        })
+    }
   }
 };
+
+// get All completed orders by date
+exports.getAllCompletedOrders = (req, res) => {
+  let query = req.query;
+  if (Object.keys(query).length !== 0) {
+    let findObj = { $nor: [{ static: 'static' }] };
+    findObj['statusInfo.status'] = 'تم التأكيد على العميل';
+    findObj.$and = [];
+    Object.keys(query).forEach((q) => {
+      let queryValue = query[q];
+      if (q == 'clientName' || q == 'mobile' || q == 'city') {
+        findObj.$and.push({ [`clientInfo.${[q]}`]: new RegExp(`^${queryValue}`) });
+      } else {
+        findObj.$and.push({ [`${[q]}`]: queryValue });
+      }
+    });
+    if (req.role == 'super-admin' || req.role == 'admin') {
+      Order.find(findObj).sort({ seq: -1 })
+        .then((value) => {
+          res.json(value);
+        })
+    } else {
+      findObj['adminVerfied.adminId'] = req.adminId
+      Order.find(findObj).sort({ seq: -1 })
+        .then((value) => {
+          res.json(value);
+        })
+    }
+  } else {
+    if (req.role == 'super-admin' || req.role == 'admin') {
+      Order.find({ 'statusInfo.status': 'تم التأكيد على العميل' }).sort({ updatedDate: -1 }).then((doc) => {
+        res.json(doc);
+      })
+
+    } else {
+      Order.find({ 'statusInfo.status': 'تم التأكيد على العميل', 'adminVerfied.adminId': req.adminId }).sort({ updatedDate: -1 }).then((doc) => {
+        res.json(doc);
+      })
+    }
+  }
+}
 
 
 /* GET get static*/
@@ -95,6 +154,38 @@ exports.getStatic = (req, res) => {
     res.json(doc);
   })
 }
+
+/* POST add order with admin view by pass the adminId to adminVerfied  */
+exports.addOrderShowWithAdmin = (req, res) => {
+  const body = req.body;
+  const io = req.app.get('io');
+  Auth.findById(body.adminId).then(doc => {
+    if (doc) {
+      Order.findOneAndUpdate({ _id: body.orderId }, {
+        $addToSet: {
+          adminVerfied: { adminId: body.adminId, email: doc.email }
+        }
+      }).then(() => {
+        io.emit('orders');
+        res.json({ message: `الى الطلب ${doc.email} تم أضافة` });
+      })
+    }
+  })
+};
+
+/* DELETE remove order with admin view by pass the adminId to adminVerfied  */
+exports.removeOrderShowWithAdmin = (req, res) => {
+  const body = req.body;
+  const io = req.app.get('io');
+  Order.findOneAndUpdate({ _id: body.orderId }, {
+    $pull: {
+      adminVerfied: { adminId: body.adminId }
+    }
+  }).then(() => {
+    io.emit('orders');
+    res.json()
+  })
+};
 
 /* POST  update all statuese of static */
 exports.updateStatus = (req, res) => {

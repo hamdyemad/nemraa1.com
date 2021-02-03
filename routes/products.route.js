@@ -3,7 +3,7 @@ const productsController = require('../controllers/products.controller');
 const verfication = require('../verfication/authorization');
 const multer = require('multer');
 
-// Multer
+// Multer of products
 let storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'images')
@@ -15,7 +15,8 @@ let storage = multer.diskStorage({
 const upload = multer({ storage }).fields([
     { name: 'image' },
     { name: 'otherImages' },
-    { name: 'reviews' }
+    { name: 'reviews' },
+    { name: 'categoryImage' }
 ])
 
 // GET get product by options
@@ -29,8 +30,9 @@ router.post('/', verfication.superAdminVerifyed, upload, productsController.addN
 
 // GET get static
 router.get('/static', productsController.getAllCategorys);
+
 // PATCH update static
-router.patch('/static', verfication.superAdminVerifyed, productsController.updateStatic);
+router.patch('/static', verfication.superAdminVerifyed, upload, productsController.updateStatic);
 
 
 // DELETE delete product color
