@@ -33,11 +33,11 @@ exports.updateStatic = (req, res) => {
           if (file) {
             deleteImg(file.filename);
           }
-          res.json({ message: "هذا الصنف موجود بالفعل" })
+          res.json({ message: "هذا الصنف موجود بالفعل", error: true })
         } else {
           Product.findOneAndUpdate({ static: 'static' }, updatedObj).then(() => {
             io.emit('categories')
-            res.json({ message: `بنجاح ${body.category} تم أضافة` });
+            res.json({ message: `بنجاح ${body.category} تم أضافة`, error: false });
           })
 
         }
