@@ -1,7 +1,6 @@
 const Order = require('../models/order.model');
 const Product = require('../models/products.model');
 const Auth = require('../models/auth.model');
-const { find } = require('../models/order.model');
 
 /* POST Add new order but before we add the order we increament the sequence value and pass the end value to the newest order */
 exports.addOrder = (req, res) => {
