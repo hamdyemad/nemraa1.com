@@ -8,9 +8,13 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app)
 const io = require('socket.io')(server, {
-    // cors: {
-    //     origin: process.env.clientServer
-    // }
+    cors: {
+        origin: process.env.clientServer
+    }
+})
+
+io.on('connection', socket => {
+    console.log('connected to socket')
 })
 const productRoute = require('./routes/products.route');
 const authRoute = require('./routes/auth.route');
