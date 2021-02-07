@@ -4,7 +4,6 @@ const Auth = require('../models/auth.model');
 
 /* POST Add new order but before we add the order we increament the sequence value and pass the end value to the newest order */
 exports.addOrder = (req, res) => {
-  const io = req.app.get('io');
   Order.findOneAndUpdate({ static: 'static' }, { $inc: { seq: 1 } }).then((value) => {
     let seq = value.seq;
     const body = req.body;
@@ -24,7 +23,6 @@ exports.addOrder = (req, res) => {
       .save()
       .then((doc) => {
         Order.findOneAndUpdate({ static: 'static' }, { $addToSet: { cities: doc.clientInfo.city } }).then(() => {
-          io.emit('orders');
           res.json({ message: `${doc.clientInfo.clientName} تم انهاء طلبك يا ` });
         });
       })
@@ -34,7 +32,6 @@ exports.addOrder = (req, res) => {
 /* PATCH update order by id */
 exports.updateOrderById = (req, res) => {
   const body = req.body;
-  const io = req.app.get('io');
   body['orderDiscount'] = body.orderDiscount;
   body['orderPrice'] = body.products.map((product) => {
     return product.totalPrice
@@ -53,7 +50,6 @@ exports.updateOrderById = (req, res) => {
       products: body.products,
       orderIncome: body.orderIncome
     }).then((val) => {
-      io.emit('orders');
       res.json({ message: `بنجاح ${body.clientInfo.clientName} تم تعديل` });
     })
   })
@@ -157,7 +153,6 @@ exports.getStatic = (req, res) => {
 /* POST add order with admin view by pass the adminId to adminVerfied  */
 exports.addOrderShowWithAdmin = (req, res) => {
   const body = req.body;
-  const io = req.app.get('io');
   Auth.findById(body.adminId).then(doc => {
     if (doc) {
       Order.findOneAndUpdate({ _id: body.orderId }, {
@@ -165,7 +160,6 @@ exports.addOrderShowWithAdmin = (req, res) => {
           adminVerfied: { adminId: body.adminId, email: doc.email }
         }
       }).then(() => {
-        io.emit('orders');
         res.json({ message: `الى الطلب ${doc.email} تم أضافة` });
       })
     }
@@ -175,32 +169,26 @@ exports.addOrderShowWithAdmin = (req, res) => {
 /* DELETE remove order with admin view by pass the adminId to adminVerfied  */
 exports.removeOrderShowWithAdmin = (req, res) => {
   const body = req.body;
-  const io = req.app.get('io');
   Order.findOneAndUpdate({ _id: body.orderId }, {
     $pull: {
       adminVerfied: { adminId: body.adminId }
     }
   }).then(() => {
-    io.emit('orders');
     res.json()
   })
 };
 
 /* POST  update all statuese of static */
 exports.updateStatus = (req, res) => {
-  let io = req.app.get('io');
   Order.findOneAndUpdate({ static: 'static' }, { $addToSet: { statuses: req.body } }).then((doc) => {
-    io.emit('staticOrders');
     res.json(doc);
   })
 }
 
 /* PATCH remove status bu status name */
 exports.removeStatus = (req, res) => {
-  let io = req.app.get('io');
   if (req.body.status !== 'معلق') {
     Order.findOneAndUpdate({ static: 'static' }, { $pull: { statuses: req.body } }).then((doc) => {
-      io.emit('staticOrders');
       res.json({ message: `تم مسح ${req.body.status} بنجاح` });
 
     })
@@ -220,10 +208,8 @@ exports.getOrderById = (req, res) => {
 
 /* DELETE delete order by id */
 exports.deleteOrderById = (req, res) => {
-  let io = req.app.get('io');
 
   Order.findByIdAndDelete(req.params.id).then((doc) => {
-    io.emit('orders')
     res.json(doc);
   })
 }
@@ -233,7 +219,6 @@ exports.addStatusHistory = (req, res) => {
   const date = new Date();
   const body = req.body;
   const statusObj = body.statusObj;
-  let io = req.app.get('io');
   let history = {};
   history.notes = body.notes
   history.updatedDate = date;
@@ -271,8 +256,6 @@ exports.addStatusHistory = (req, res) => {
         updatedDate: date,
         "clientInfo.notes": history.notes
       }).then(() => {
-        io.emit('products');
-        io.emit('orders');
         res.json({ message: `تم تعديل الحالة الى ${history.statusInfo.status}` });
       })
   })
@@ -281,7 +264,6 @@ exports.addStatusHistory = (req, res) => {
 exports.addManyOfHistory = (req, res) => {
   let date = new Date();
   const body = req.body;
-  let io = req.app.get('io');
   let history = { statusInfo: body.statusInfo };
   history['updatedDate'] = date;
   for (let seq of body.seqs) {
@@ -316,8 +298,6 @@ exports.addManyOfHistory = (req, res) => {
       'statusInfo.productStatus': history.statusInfo.productStatus,
       updatedDate: date,
     }).then((value) => {
-      io.emit('products');
-      io.emit('orders');
       res.json(value);
     })
 }

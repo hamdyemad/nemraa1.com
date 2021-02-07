@@ -5,17 +5,6 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const options = { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false }
 const app = express();
-const http = require('http');
-const server = http.createServer(app)
-const io = require('socket.io')(server, {
-    cors: {
-        origin: process.env.clientServer
-    }
-})
-
-io.on('connection', socket => {
-    console.log('connected to socket')
-})
 const productRoute = require('./routes/products.route');
 const authRoute = require('./routes/auth.route');
 const orderRoute = require('./routes/order.route');
@@ -35,7 +24,6 @@ app.use((req, res, next) => {
     next();
 })
 
-app.set('io', io);
 // routes
 app.use(informatiomRoute);
 app.use('/products', productRoute);
@@ -57,4 +45,4 @@ mongoose.connect(process.env.URI, options).then(() => {
     })
 
 
-server.listen(process.env.PORT, console.log(`server listend at ${process.env.PORT}`))
+app.listen(process.env.PORT, console.log(`server listend at ${process.env.PORT}`))

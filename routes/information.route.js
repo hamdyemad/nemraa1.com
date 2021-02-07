@@ -22,7 +22,6 @@ const upload = multer({ storage }).single('logo');
 
 // patch information by id
 router.post('/info', upload, (req, res) => {
-  let io = req.app.get('io');
   const body = req.body;
   informationModel.findOne({}).then((doc) => {
     if (doc) {
@@ -47,7 +46,6 @@ router.post('/info', upload, (req, res) => {
           }
           informationModel.updateOne({ _id: doc._id }, { logo: file }).then();
         }
-        io.emit('information');
         res.json({ message: 'تم التعديل بنجاح' })
       })
     } else {
@@ -70,7 +68,6 @@ router.post('/info', upload, (req, res) => {
           let file = req.file.filename;
           informationModel.updateOne({ _id: doc._id }, { logo: file }).then();
         }
-        io.emit('information');
         res.json({ message: 'تم التعديل بنجاح' })
       })
     }

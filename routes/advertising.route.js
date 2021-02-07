@@ -36,24 +36,9 @@ router.get('/:role', (req, res) => {
 
 router.post('/', verfication.superAdminVerifyed, upload, (req, res) => {
   const body = req.body;
-  const io = req.app.get('io');
-  if (body.role == 'upper') {
-    advertisingModel.findOne({ role: body.role }).then((doc) => {
-      if (doc) {
-        res.json({ errMessage: "اعلان البانر موجود بالفعل" })
-        removeImg(req.file.filename);
-      } else {
-        let newAdvertisingModel = new advertisingModel({ role: body.role, link: body.link, image: req.file.filename })
-        newAdvertisingModel.save().then(() => {
-          io.emit('upperAdvertise')
-          res.json({ message: 'تم اضافة اعلان البانر بنجاح' });
-        })
-      }
-    })
-  } else if (body.role == 'before-products' || body.role == 'after-products') {
+  if (body.role == 'before-products' || body.role == 'after-products') {
     let newAdvertisingModel = new advertisingModel({ role: body.role, link: body.link, image: req.file.filename })
     newAdvertisingModel.save().then(() => {
-      io.emit('advertise')
       res.json({ message: 'تم اضافة الاعلان بنجاح' });
     })
   } else {
@@ -64,13 +49,10 @@ router.post('/', verfication.superAdminVerifyed, upload, (req, res) => {
 
 router.delete('/:id', verfication.superAdminVerifyed, (req, res) => {
   let id = req.params.id;
-  const io = req.app.get('io');
   advertisingModel.findById(id).then((doc) => {
     if (doc) {
       advertisingModel.findByIdAndDelete(id).then(() => {
         removeImg(doc.image);
-        io.emit('upperAdvertise')
-        io.emit('advertise')
         res.json({ message: "تم ازالة الأعلان بنجاح" })
       })
     }

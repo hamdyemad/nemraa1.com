@@ -5,15 +5,12 @@ const egyptModel = require('../models/egypt.model');
 
 exports.updateShipping = (req, res) => {
   let status = req.body.status;
-  let io = req.app.get('io');
 
   egyptModel.find({}).then((doc) => {
     for (let city of doc) {
       egyptModel.findByIdAndUpdate(city._id, { freeShipping: status }).then()
     }
   }).then(() => {
-    io.emit('cities');
-
     if (status == true) {
       res.json({ message: 'تم تفعيل الشحن المجانى' })
     } else {
@@ -25,18 +22,15 @@ exports.updateShipping = (req, res) => {
 
 // update city
 exports.updateCity = (req, res) => {
-  let io = req.app.get('io');
   const body = req.body;
   body.city = body.city.toLowerCase();
   egyptModel.findByIdAndUpdate(req.params.id, { city: body.city, price: body.price, shippingTime: body.shippingTime }).then(() => {
-    io.emit('cities');
     res.json({ message: `${body.city} تم تعديل` });
   })
 }
 // add new city
 exports.addCity = (req, res) => {
   const body = req.body;
-  let io = req.app.get('io');
   body.city = body.city.toLowerCase();
   egyptModel.findOne({ city: body.city }).then((doc) => {
 
@@ -49,7 +43,6 @@ exports.addCity = (req, res) => {
         shippingTime: body.shippingTime
       });
       newCity.save().then(() => {
-        io.emit('cities');
         res.json({ message: `${body.city} تم اضافة` })
       })
     }
@@ -65,9 +58,7 @@ exports.getCities = (req, res) => {
 
 // delete city by id
 exports.deleteCityById = (req, res) => {
-  let io = req.app.get('io');
   egyptModel.findByIdAndRemove(req.params.id).then((doc) => {
-    io.emit('cities');
     res.json(doc)
   })
 }

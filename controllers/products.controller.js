@@ -22,7 +22,6 @@ exports.updateStatic = (req, res) => {
     file = req.files.categoryImage[0];
     body['categoryImage'] = file.filename;
   }
-  const io = req.app.get('io');
   let updatedObj = {};
   if (body.title) {
     if (body.title == 'add') {
@@ -36,7 +35,6 @@ exports.updateStatic = (req, res) => {
           res.json({ message: "هذا الصنف موجود بالفعل", error: true })
         } else {
           Product.findOneAndUpdate({ static: 'static' }, updatedObj).then(() => {
-            io.emit('categories')
             res.json({ message: `بنجاح ${body.category} تم أضافة`, error: false });
           })
 
@@ -48,7 +46,6 @@ exports.updateStatic = (req, res) => {
         if (catObj) {
           deleteImg(catObj.categoryImage);
           Product.findOneAndUpdate({ static: 'static' }, { $pull: { _categories: { category: body.category } } }).then(() => {
-            io.emit('categories')
             res.json({ message: `${body.category} تم ازالة` });
           })
         } else {
@@ -143,7 +140,6 @@ exports.getSuggestProducts = (req, res) => {
 // POST add new Product
 exports.addNewProduct = (req, res) => {
   const body = req.body;
-  let io = req.app.get('io');
   if (body.discount == 'null' || body.discount == '') {
     body.discount = 0;
   }
@@ -192,7 +188,6 @@ exports.addNewProduct = (req, res) => {
               { $push: { reviews: body.reviews } }).then()
 
           }
-          io.emit('products');
           res.json(doc)
         }).catch(err => {
           console.log(err)
@@ -210,7 +205,6 @@ exports.addNewProduct = (req, res) => {
 // PATCH update product
 exports.updateProduct = (req, res) => {
   const body = req.body;
-  let io = req.app.get('io');
   let sizes; (body.sizes) ? sizes = body.sizes : sizes = [];
   let otherImages; (body.otherImages) ? otherImages = body.otherImages : otherImages = [];
   if (body.discount == 'null' || body.discount == '') {
@@ -258,9 +252,6 @@ exports.updateProduct = (req, res) => {
         console.log('otherImages deleted')
       })
     }
-    io.emit('updateProduct');
-    io.emit('products');
-
     res.json(doc);
   })
     .catch()
@@ -269,7 +260,6 @@ exports.updateProduct = (req, res) => {
 
 // DELETE delete product by id
 exports.deleteProduct = (req, res) => {
-  let io = req.app.get('io');
   Product.findOne({ _id: req.params.id }).then((doc) => {
     if (doc) {
       deleteImg(doc.image);
@@ -280,7 +270,6 @@ exports.deleteProduct = (req, res) => {
         deleteImg(image);
       }
       Product.deleteOne({ _id: req.params.id }).then((val) => {
-        io.emit('products');
         res.json(val);
       })
     }
@@ -289,26 +278,20 @@ exports.deleteProduct = (req, res) => {
 
 // DELETE delete color & size by id
 exports.deleteColorAndSize = (req, res) => {
-  let io = req.app.get('io');
   Product.findByIdAndUpdate(req.params.id, {
     $pull: { colors: req.body.color, sizes: req.body.size }
   }).then((doc) => {
-    io.emit('updateProduct');
-    io.emit('products');
     res.json(doc);
   })
 }
 
 // DELETE reviews by id
 exports.deleteReview = (req, res) => {
-  let io = req.app.get('io');
   Product.findById(req.params.id).then(doc => {
     Product.updateOne({ _id: doc._id }, {
       $pull: { reviews: { reviewerName: req.body.reviewerName } }
     }).then(val => {
       deleteImg(req.body.reviewerImage);
-      io.emit('updateProduct');
-      io.emit('products');
       res.json({ message: `${req.body.reviewerName} تم مسح` });
     })
   })
