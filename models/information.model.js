@@ -6,15 +6,10 @@ const informationSchema = mongoose.Schema({
         youtube: String,
         watsappNumber: String
     },
-    location: {
-        city: String,
-        country: String
-    },
     logo: String,
     email: String,
     mobile: String,
     companyName: String,
-    aboutCompany: String,
     qrCode: String
 });
 
