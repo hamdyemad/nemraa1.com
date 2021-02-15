@@ -20,6 +20,11 @@ const ProductSchema = mongoose.Schema({
             category: {
                 required: true,
                 type: String
+            },
+            show: {
+                required: true,
+                type: Boolean,
+                default: false
             }
         }
     ],

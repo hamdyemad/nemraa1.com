@@ -6,10 +6,6 @@ const homeSchema = mongoose.Schema({
                 type: String,
                 required: true,
             },
-            carouselTitle: {
-                type: String,
-                required: true
-            },
             carouselHeader: {
                 type: String,
                 required: true

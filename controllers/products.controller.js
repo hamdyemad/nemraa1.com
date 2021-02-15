@@ -1,8 +1,15 @@
 const Product = require('../models/products.model');
 const fs = require('fs');
+const Advertise = require('../models/advertise.model');
 // Delete Img fn
 function deleteImg(img) {
   fs.unlink(`images/${img}`, (err) => {
+    if (err) console.log(err, 'err');
+  })
+}
+// Delete Img fn
+function removeAdvertiseImage(img) {
+  fs.unlink(`images/advertise-images/${img}`, (err) => {
     if (err) console.log(err, 'err');
   })
 }
@@ -11,6 +18,19 @@ function deleteImg(img) {
 exports.getAllCategorys = (req, res) => {
   Product.findOne({ static: 'static' }).then((doc) => {
     res.json(doc);
+  })
+}
+
+// toggle show category
+exports.toggleShowOfCategory = (req, res) => {
+  const category = req.body.category;
+  const show = req.body.show;
+  Product.findOneAndUpdate({ static: 'static', '_categories.category': category }, { '_categories.$.show': show }).then(() => {
+    if (show == true) {
+      res.json({ message: "تم تفعيل الأظهار", error: false })
+    } else {
+      res.json({ message: "تم تبطيل الأظهار", error: true })
+    }
   })
 }
 
@@ -35,7 +55,13 @@ exports.updateStatic = (req, res) => {
           res.json({ message: "هذا الصنف موجود بالفعل", error: true })
         } else {
           Product.findOneAndUpdate({ static: 'static' }, updatedObj).then(() => {
-            res.json({ message: `بنجاح ${body.category} تم أضافة`, error: false });
+            let newAdvertise = new Advertise({
+              category: body.category,
+              advertisingsOfCategory: []
+            })
+            newAdvertise.save().then(() => {
+              res.json({ message: `بنجاح ${body.category} تم أضافة`, error: false });
+            })
           })
 
         }
@@ -46,7 +72,15 @@ exports.updateStatic = (req, res) => {
         if (catObj) {
           deleteImg(catObj.categoryImage);
           Product.findOneAndUpdate({ static: 'static' }, { $pull: { _categories: { category: body.category } } }).then(() => {
-            res.json({ message: `${body.category} تم ازالة` });
+            Advertise.findOne({ category: body.category }).then((doc) => {
+              let advertisingsOfCategory = doc.advertisingsOfCategory;
+              advertisingsOfCategory.forEach((advertiseObj) => {
+                removeAdvertiseImage(advertiseObj.advertiseImage);
+              })
+              Advertise.findOneAndRemove({ category: body.category }).then(() => {
+                res.json({ message: "تم مسح الصنف بنجاح" })
+              })
+            })
           })
         } else {
           if (file) {

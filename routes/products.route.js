@@ -31,9 +31,11 @@ router.post('/', verfication.superAdminVerifyed, upload, productsController.addN
 // GET get static
 router.get('/static', productsController.getAllCategorys);
 
+// toggle show of category
+router.patch('/static/show', productsController.toggleShowOfCategory);
+
 // PATCH update static
 router.patch('/static', verfication.superAdminVerifyed, upload, productsController.updateStatic);
-
 
 // DELETE delete product color
 router.patch('/colorAndSize/:id', verfication.superAdminVerifyed, productsController.deleteColorAndSize)
