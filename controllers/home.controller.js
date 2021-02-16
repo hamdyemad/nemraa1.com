@@ -8,6 +8,19 @@ function deleteImg(img) {
     })
 }
 
+// toggle show of carousel
+exports.toggleShowOfCarousel = (req, res) => {
+    const id = req.params.id;
+    const show = req.body.show;
+    homeModel.findOneAndUpdate({ static: 'static', 'homeCarousel._id': id }, { 'homeCarousel.$.show': show }).then(() => {
+        if (show == true) {
+            res.json({ message: "تم تفعيل الأظهار", error: false })
+        } else {
+            res.json({ message: "تم تبطيل الأظهار", error: true })
+        }
+    })
+}
+
 exports.getAllCarousel = (req, res) => {
     homeModel.findOne().then(doc => {
         res.json(doc);

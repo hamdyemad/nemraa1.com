@@ -9,6 +9,14 @@ const homeSchema = mongoose.Schema({
             carouselHeader: {
                 type: String,
                 required: true
+            },
+            carouselButton: {
+                type: String
+            },
+            show: {
+                type: Boolean,
+                default: false,
+                required: true
             }
         }
     ]

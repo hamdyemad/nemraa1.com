@@ -19,6 +19,9 @@ router.get('/carousel', homeController.getAllCarousel)
 // POST add new carousel img
 router.post('/carousel', verfication.superAdminVerifyed, upload, homeController.addNewCarousel);
 
+// PATCH toggle show of button
+router.patch('/carousel/:id', homeController.toggleShowOfCarousel)
+
 // DELETE remove carousel by id
 router.delete('/carousel/:id', verfication.superAdminVerifyed, homeController.removeCarousel)
 
