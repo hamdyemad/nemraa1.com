@@ -205,6 +205,8 @@ exports.addNewProduct = (req, res) => {
           category: body.category,
           price: body.price,
           amount: body.amount,
+          isOffer: body.isOffer,
+          isBreakable: body.isBreakable,
           discount: body.discount,
           unitPrice: (body.price - body.discount),
           youtubeVideo: body.youtubeVideo,
@@ -255,6 +257,8 @@ exports.updateProduct = (req, res) => {
     colors: body.colors,
     sizes: sizes,
     discount: body.discount,
+    isOffer: body.isOffer,
+    isBreakable: body.isBreakable,
     unitPrice: (body.price - body.discount),
     youtubeVideo: body.youtubeVideo,
     image: body.image,
@@ -289,6 +293,19 @@ exports.updateProduct = (req, res) => {
     res.json(doc);
   })
     .catch()
+}
+
+// PATCH update product offer by id
+exports.updateProductOfferById = (req, res) => {
+  const id = req.params.id;
+  const body = req.body;
+  Product.findByIdAndUpdate(id, { isOffer: body.isOffer }).then(() => {
+    if (body.isOffer == true) {
+      res.json({ message: "تم اضافة المنتج الى قائمة العروض", error: false })
+    } else {
+      res.json({ message: "تم ازالة المنتج الى قائمة العروض", error: true })
+    }
+  })
 }
 
 

@@ -20,6 +20,7 @@ router.post('/', (req, res) => {
                             name: val.name,
                             facebookPexel: val.facebookPexel,
                             category: val.category,
+                            isBreakable: val.isBreakable,
                             image: val.image,
                             productInfo: bodyValue.productInfo,
                             unitPrice: val.unitPrice,

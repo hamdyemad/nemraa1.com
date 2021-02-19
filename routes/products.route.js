@@ -46,6 +46,9 @@ router.patch('/reviews/:id', verfication.superAdminVerifyed, productsController.
 // PATCH update product
 router.patch('/:id', verfication.superAdminVerifyed, upload, productsController.updateProduct);
 
+// PATCH update product offer
+router.patch('/offer/:id', verfication.superAndAdminVerifed, productsController.updateProductOfferById)
+
 // GET get product by id
 router.get('/:id', productsController.getProductById)
 // GET get product by name
