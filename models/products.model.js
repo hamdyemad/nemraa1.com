@@ -37,7 +37,6 @@ const ProductSchema = mongoose.Schema({
     amount: Number,
     isOffer: Boolean,
     isBreakable: Boolean,
-    facebookPexel: String,
     youtubeVideo: String,
     image: String,
     reviews: {

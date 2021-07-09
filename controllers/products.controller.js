@@ -21,6 +21,7 @@ exports.getAllCategorys = (req, res) => {
   })
 }
 
+
 // toggle show category
 exports.toggleShowOfCategory = (req, res) => {
   const category = req.body.category;
@@ -199,7 +200,6 @@ exports.addNewProduct = (req, res) => {
           seq: doc.seq,
           name: body.name,
           description: body.description,
-          facebookPexel: body.facebookPexel,
           colors: body.colors,
           sizes: body.sizes,
           category: body.category,
@@ -250,7 +250,6 @@ exports.updateProduct = (req, res) => {
   Product.findByIdAndUpdate(req.params.id, {
     name: body.name,
     description: body.description,
-    facebookPexel: body.facebookPexel,
     category: body.category,
     price: body.price,
     amount: body.amount,
