@@ -21,6 +21,15 @@ exports.getAllCategorys = (req, res) => {
   })
 }
 
+// update category name
+exports.updateCategory = (req, res) => {
+  const category = req.body.category;
+  const _id = req.body._id;
+  Product.findOneAndUpdate({ static: 'static', '_categories._id': _id }, { '_categories.$.category': category }).then(() => {
+    res.json({ message: "تم تعديل الصنف بنجاح", error: false })
+  })
+}
+
 
 // toggle show category
 exports.toggleShowOfCategory = (req, res) => {

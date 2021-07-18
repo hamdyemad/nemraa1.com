@@ -34,6 +34,9 @@ router.get('/static', productsController.getAllCategorys);
 // toggle show of category
 router.patch('/static/show', productsController.toggleShowOfCategory);
 
+// Edit Category Name
+router.patch('/static/category', productsController.updateCategory);
+
 // PATCH update static
 router.patch('/static', verfication.superAdminVerifyed, upload, productsController.updateStatic);
 
