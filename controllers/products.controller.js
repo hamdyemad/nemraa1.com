@@ -21,6 +21,21 @@ exports.getAllCategorys = (req, res) => {
   })
 }
 
+
+// get category by id
+exports.getCategory = (req, res) => {
+  const _id = req.params.id;
+  Product.findOne({ static: 'static' }).then((doc) => {
+    let category = doc._categories.find((asd) => {
+      if(asd._id = _id) {
+        return asd;
+      }
+    })
+    res.json(category);
+  })
+}
+
+
 // update category name
 exports.updateCategory = (req, res) => {
   const category = req.body.category;
@@ -122,7 +137,7 @@ exports.getProductsByOptions = (req, res) => {
       $or: [
         { category: query.category },
         { seq: query.id },
-        { name: new RegExp([`^${query.name}`]) },
+        { name: new RegExp([`^${query.name}`], 'i') },
         { addedDate: query.addedDate }
       ],
     }).then((doc) => {
@@ -166,7 +181,7 @@ exports.getProductByName = (req, res) => {
 
 exports.getSuggestProducts = (req, res) => {
   let name = req.params.name;
-  Product.find({ $nor: [{ static: 'static' }], name: new RegExp([`^${name}`]) }).then((doc) => {
+  Product.find({ $nor: [{ static: 'static' }], name: new RegExp([`^${name}`], 'i') }).then((doc) => {
     if (doc.length !== 0) {
       let filteredProducts = doc.map((obj) => {
         return {

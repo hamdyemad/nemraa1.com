@@ -25,6 +25,7 @@ const orderSchema = mongoose.Schema({
             name: String,
             image: String,
             category: String,
+            category_id: String,
             isBreakable: Boolean,
             facebookPexel: String,
             productInfo: [],
