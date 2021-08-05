@@ -1,8 +1,7 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
-const authModel = require('../models/auth.model');
-
+const authModel = require("../models/auth.model");
 
 // POST register
 exports.register = (req, res) => {
@@ -10,35 +9,45 @@ exports.register = (req, res) => {
   body.email = body.email.toLowerCase();
   body.password = body.password.toLowerCase();
   authModel.findOne({ email: body.email }).then((doc) => {
-    if (doc) res.json({ message: 'هذا المستخدم مسجل بالفعل' })
+    if (doc) res.json({ message: "هذا المستخدم مسجل بالفعل" });
     else {
       bcrypt.hash(body.password, 10).then((hashedPassword) => {
         let newAuth = new authModel({
           firstName: body.firstName,
           lastName: body.lastName,
           email: body.email,
-          password: hashedPassword
-        })
-        newAuth.save().then(() => {
-          if (body.role == 'super-admin') {
-            authModel.updateOne({ email: body.email }, { role: 'super-admin' }).then(() => {
-              res.json({ message: `الى قائمة الأدمنز ${body.firstName} ${body.lastName} تم اضافة` });
-            })
-          } else if (body.role == 'sub-admin') {
-            authModel.updateOne({ email: body.email }, { role: 'sub-admin' }).then(() => {
-              res.json({ message: `الى قائمة الأدمنز ${body.firstName} ${body.lastName} تم اضافة` });
-            })
-          }
-          else {
-            res.json({ message: `الى قائمة المشرفين ${body.firstName} ${body.lastName} تم اضافة` });
-          }
-        })
-          .catch(err => res.json(err))
-      })
+          password: hashedPassword,
+        });
+        newAuth
+          .save()
+          .then(() => {
+            if (body.role == "super-admin") {
+              authModel
+                .updateOne({ email: body.email }, { role: "super-admin" })
+                .then(() => {
+                  res.json({
+                    message: `الى قائمة الأدمنز ${body.firstName} ${body.lastName} تم اضافة`,
+                  });
+                });
+            } else if (body.role == "sub-admin") {
+              authModel
+                .updateOne({ email: body.email }, { role: "sub-admin" })
+                .then(() => {
+                  res.json({
+                    message: `الى قائمة الأدمنز ${body.firstName} ${body.lastName} تم اضافة`,
+                  });
+                });
+            } else {
+              res.json({
+                message: `الى قائمة المشرفين ${body.firstName} ${body.lastName} تم اضافة`,
+              });
+            }
+          })
+          .catch((err) => res.json(err));
+      });
     }
-  })
-
-}
+  });
+};
 
 // POST login
 exports.login = (req, res) => {
@@ -47,27 +56,38 @@ exports.login = (req, res) => {
   body.password = body.password.toLowerCase();
   authModel.findOne({ email: body.email }).then((doc) => {
     if (!doc) {
-      res.json({ emailMessage: "الايميل الذي ادخلته خطأ" })
+      res.json({ emailMessage: "الايميل الذي ادخلته خطأ" });
     } else {
       bcrypt
         .compare(body.password, doc.password)
         .then((same) => {
           if (!same) {
-            res.json({ passwordMessage: "الرقم السري خطأ" })
+            res.json({ passwordMessage: "الرقم السري خطأ" });
           } else {
             switch (doc.role) {
-              case 'admin': {
-                let token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.adminSecretKey);
-                res.json({ access_token: token, role: doc.role });
-              }
-                break
-              case 'super-admin': {
-                let token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.superAdminSecretKey);
-                res.json({ access_token: token, role: doc.role });
-              }
-                break
-              case 'sub-admin': {
-                let token = jwt.sign({ adminId: doc._id, role: doc.role }, process.env.subAdminSecretKey);
+              case "admin":
+                {
+                  let token = jwt.sign(
+                    { adminId: doc._id, role: doc.role },
+                    process.env.adminSecretKey
+                  );
+                  res.json({ access_token: token, role: doc.role });
+                }
+                break;
+              case "super-admin":
+                {
+                  let token = jwt.sign(
+                    { adminId: doc._id, role: doc.role },
+                    process.env.superAdminSecretKey
+                  );
+                  res.json({ access_token: token, role: doc.role });
+                }
+                break;
+              case "sub-admin": {
+                let token = jwt.sign(
+                  { adminId: doc._id, role: doc.role },
+                  process.env.subAdminSecretKey
+                );
                 res.json({ access_token: token, role: doc.role });
               }
             }
@@ -78,43 +98,44 @@ exports.login = (req, res) => {
           mongoose.disconnect();
         });
     }
-  })
-}
-
+  });
+};
 
 // get all admins
 exports.getAllAdmins = (req, res) => {
   authModel.find({}).then((doc) => {
     res.json(doc);
-  })
-}
+  });
+};
 
 // get sub-admins
 exports.getSubAdmins = (req, res) => {
-  authModel.find({ role: 'sub-admin' }).then((doc) => {
+  authModel.find({ role: { $in: ["sub-admin", "admin"] } }).then((doc) => {
     res.json(doc);
-  })
-}
+  });
+};
 
 // get admin info
 exports.getAdminInfo = (req, res) => {
   authModel.findById(req.adminId).then((doc) => {
     res.json(doc);
-  })
-}
+  });
+};
 
 // PATCH update role
 exports.updateRole = (req, res) => {
-  authModel.findByIdAndUpdate(req.params.id, {
-    role: req.body.role
-  }).then((doc) => {
-    res.json(doc);
-  })
-}
+  authModel
+    .findByIdAndUpdate(req.params.id, {
+      role: req.body.role,
+    })
+    .then((doc) => {
+      res.json(doc);
+    });
+};
 
 // DELETE admin
 exports.deleteAdmin = (req, res) => {
   authModel.findOneAndDelete({ _id: req.params.id }).then((doc) => {
     res.json(doc);
-  })
-}
+  });
+};
