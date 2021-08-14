@@ -18,6 +18,7 @@ exports.addOrder = (req, res) => {
         if (!body.orderDiscount) {
           body["orderDiscount"] = 0;
         }
+        body["addedDate"] = body.addedDate;
         body["orderDiscount"] = body.orderDiscount;
         body["orderPrice"] = products
           .map((product) => {
@@ -51,6 +52,7 @@ exports.addOrderFromUser = (req, res) => {
       if (!body.orderDiscount) {
         body["orderDiscount"] = 0;
       }
+      body["addedDate"] = body.addedDate;
       body["orderDiscount"] = body.orderDiscount;
       body["orderPrice"] = products
         .map((product) => {

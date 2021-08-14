@@ -1,13 +1,5 @@
 const mongoose = require("mongoose");
 const orderStatus = require("./order-status");
-let doDate = (number) => {
-  return +number < 10 ? (number = `${0}${number}`) : number;
-};
-let date = new Date();
-let month = `${date.getMonth() + 1}`;
-let day = `${date.getDate()}`;
-month = doDate(month);
-day = doDate(day);
 const orderSchema = mongoose.Schema({
   seq: Number,
   static: String,
@@ -69,7 +61,6 @@ const orderSchema = mongoose.Schema({
   updatedDate: Date,
   addedDate: {
     type: String,
-    default: `${date.getFullYear()}-${month}-${day}`,
   },
 });
 const Order = mongoose.model("order", orderSchema);
